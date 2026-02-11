@@ -1,0 +1,10 @@
+*.bam filter=lfs diff=lfs merge=lfs -text
+*.fasta filter=lfs diff=lfs merge=lfs -text
+*.fa filter=lfs diff=lfs merge=lfs -text
+*.vcf.gz filter=lfs diff=lfs merge=lfs -text
+*.vcf filter=lfs diff=lfs merge=lfs -text
+*.h5ad filter=lfs diff=lfs merge=lfs -text
+*.csv filter=lfs diff=lfs merge=lfs -text
+*.npy filter=lfs diff=lfs merge=lfs -text
+nav15/dataRMSD/Nav15_all_models_all_references_RMSD_distances.csv !text !filter !merge !diff
+nav15/dataRMSD/Nav15_all_models_all_references_RMSD_distances_OK3.csv !text !filter !merge !diff
