@@ -1,0 +1,75 @@
+Cav1.2 preliminary results
+
+Masking produces a modest, region-selective expansion of the Cav1.2 distance ensemble. Across shared
+observables, the median masked-to-vanilla standard-deviation ratio is 1.05 for WT, 1.09 for G402S, and
+1.08 for G406R. Variability increases for 56%, 61%, and 57% of shared distances, respectively.
+
+The effect is strongest in mobile gating regions. Voltage-sensor distances show median
+standard-deviation ratios of 1.22 to 1.29. Mutant intracellular-gate interquartile ranges increase by
+approximately 42% for G402S and 40% for G406R. Selectivity-filter distances remain comparatively
+constrained, with standard-deviation ratios below one.
+
+These findings suggest that masking relaxes selected voltage-sensor and gate geometries without broadly
+disrupting the pore. The increase is reproducible but smaller than in Kv2.1. RMSD clustering is still
+needed to determine whether the broader distributions represent distinct conformational states.
+
+Gate openness and coordinated state sampling
+
+The joint gate-state analysis does not show a large mutation-dependent bias toward a more open
+intracellular gate. Relative to protocol-matched WT, the median maximum gate span changes by only
++0.06 Å for G402S and -0.07 Å for G406R under vanilla prediction, and by +0.12 Å and +0.08 Å,
+respectively, under masking. Masking therefore broadens gate sampling more than it displaces the
+median gate geometry.
+
+G402S shifts the L401-D1533 mutation-pocket coordinate toward larger distances in both vanilla
+(+0.24 Å relative to WT) and masked (+0.35 Å) ensembles. Gate opening and this pocket distance are
+negatively correlated in both backgrounds, including G402S itself (Spearman rho = -0.37 in vanilla
+and -0.52 when masked). The sampled motion is coordinated, but it does not describe simultaneous
+expansion of both coordinates and should not yet be labeled an open-state transition.
+
+G406R also produces a mutation-site bias in both protocols: the E407-R1532 distance is +1.36 Å above
+WT in vanilla and +0.95 Å above WT when masked. This local shift is therefore not created by masking.
+Masking broadens the gate and strengthens a negative gate-interface relationship (rho = -0.44 in
+masked G406R, compared with +0.28 in vanilla G406R). Both Cav1.2 mutants alter their local S6-interface
+geometry in vanilla and masked predictions, whereas evidence for a mutation-specific bias toward a
+globally more open pore remains weak.
+
+Voltage-sensor bias relative to WT
+
+Neither Cav1.2 mutant shows a consistent VSD-wide contraction relative to WT. For G402S, the median
+mutant-minus-WT shift across the eight VSD distances is -0.005 Å in vanilla and +0.010 Å when masked.
+Four of eight contacts are shorter in vanilla, whereas only two are shorter under masking. The largest
+individual response is localized to domain III: F940-K1015 becomes shorter (-0.08 to -0.09 Å), while
+F940-K1031 becomes longer (+0.08 Å in vanilla and +0.21 Å when masked). This is a pair-specific
+rearrangement rather than uniform VSD compaction.
+
+G406R is similarly close to WT, with median shifts of +0.015 Å in vanilla and +0.010 Å when masked.
+Most vanilla contacts are slightly longer, whereas the masked ensemble contains three shorter and five
+longer contacts. All median shifts remain within 0.08 Å. VSD spread is also similar to or slightly
+narrower than WT. Thus, the Cav1.2 mutations alter the local S6 interface much more clearly than they
+bias the VSDs, and masking does not uncover a common closer-VSD state.
+
+Shortest-distance contacts of the introduced residues
+
+G402S produces a modest, partner-specific contact change rather than a stable new interaction network.
+The clearest candidate is S402-I1523: 19.2% of vanilla and 12.1% of masked mutant models place the two
+residues within 4 Å, compared with no corresponding G402-I1523 contacts in WT. The median shortest
+distance decreases from 6.5 Å in WT to 4.8 Å in G402S under both protocols. S402-D1528 contacts are
+rare (1.0% in vanilla and 0.1% when masked), and the other tested partners do not form recurrent
+contacts. Conversely, the frequent WT G402-M1524 proximity is lost: the WT contact fraction is 31.1%
+in vanilla and 58.0% when masked, compared with 0.0% and 1.6% for S402. Masking therefore reduces the
+new S402-I1523 population and does not strengthen a unique G402S contact.
+
+G406R has a much stronger local effect. R406 approaches acidic D1533 in 29.0% of vanilla models and
+8.8% of masked models, and D1528 in 20.6% and 25.5%, respectively. These contacts are absent or rare
+for WT G406 and are chemically plausible candidate electrostatic interactions. Masking redistributes
+the arginine between the two acidic partners: it reduces R406-D1533 engagement while modestly
+increasing R406-D1528 engagement.
+
+R406-T1531 is nominally the most frequent nearest pair, occurring within 4 Å in essentially every
+G406R model. It cannot yet be treated as a real interaction. Its median shortest distance is 2.3 Å in
+vanilla and 1.3 Å when masked; 25.2% and 78.1% of models, respectively, contain distances below 2 Å.
+These values indicate severe atomic overlap rather than a credible noncovalent contact. The overlap is
+especially strong under masking and may contribute to apparent local shifts in G406R. Structural
+inspection and side-chain relaxation are required before interpreting this pair or using the G406R
+shortest-distance ensemble mechanistically.

@@ -14,7 +14,7 @@ import pandas as pd
 import seaborn as sns
 
 
-STYLE_VERSION = "kv21-clean-green-v3-s6-profile"
+STYLE_VERSION = "kv21-clean-green-v4-distal-s6"
 
 
 KV21_PALETTE = {
@@ -247,10 +247,11 @@ def plot_distances_by_alias_violin(
         point_colors = list(pdb_colors) if pdb_colors and len(pdb_colors) == len(exp_distances_list) else [KV21_PALETTE["experimental"]] * len(exp_distances_list)
         used = [False] * len(exp_distances_list)
         for i, distances in enumerate(exp_distances_list):
+            offset = (i - (len(exp_distances_list) - 1) / 2) * 0.07
             for alias, values in distances.items():
                 if alias not in aliases:
                     continue
-                xpos = list(aliases).index(alias)
+                xpos = list(aliases).index(alias) + offset
                 for value in values:
                     ax.scatter(xpos, value, facecolors="white", edgecolors=point_colors[i],
                                marker=marker_styles[i % len(marker_styles)], s=34, linewidths=0.8, zorder=6,
@@ -354,11 +355,11 @@ def plot_protocol_split_with_experimentals(
     ax.get_legend().remove()
     fig.legend(
         handles, labels, title="Protocols and experimental structures",
-        loc="lower center", bbox_to_anchor=(0.5, -0.02),
-        ncol=min(3, len(labels)), fontsize=9, title_fontsize=9, frameon=True,
+        loc="lower center", bbox_to_anchor=(0.5, 0.01),
+        ncol=min(4, len(labels)), fontsize=9, title_fontsize=9, frameon=True,
     )
-    fig.subplots_adjust(bottom=0.20)
-    finish_figure(fig, legend_addon=True)
+    finish_figure(fig, legend_addon=False)
+    fig.subplots_adjust(bottom=0.32)
     plt.show()
     return ax
 
@@ -473,17 +474,17 @@ def plot_split_ensemble_with_experimentals(
 
     finish_axes(
         ax,
-        f"Kv2.1 | WT vs {mutant_label} | {protocol} | {region_label} | split violin | experimental distances",
+        f"Kv2.1 | WT vs {mutant_label} | {protocol} | {region_label} | experimental distances",
     )
     handles, labels = ax.get_legend_handles_labels()
     fig.legend(
         handles, labels, title="Ensembles and experimental structures",
-        loc="lower center", bbox_to_anchor=(0.5, -0.02),
+        loc="lower center", bbox_to_anchor=(0.5, 0.01),
         ncol=min(4, len(labels)), fontsize=9, title_fontsize=9, frameon=True,
     )
     ax.get_legend().remove()
-    fig.subplots_adjust(bottom=0.18)
-    finish_figure(fig, legend_addon=True)
+    finish_figure(fig, legend_addon=False)
+    fig.subplots_adjust(bottom=0.32)
     plt.show()
     return ax
 

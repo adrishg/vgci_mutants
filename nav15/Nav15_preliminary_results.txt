@@ -1,0 +1,74 @@
+Nav1.5 preliminary results
+
+The current Nav1.5 masks do not globally broaden the predicted distance ensemble. For WT masked v2, the
+median masked-to-vanilla standard-deviation ratio is 0.94, and 39% of shared distances become more
+variable. Excluding the IFM residues from the masked region, and therefore retaining their MSA
+information in WT masked-v2-noIFM, gives a similar ratio of 0.95.
+
+The QQQ ensembles show the same global tendency. The standard-deviation ratio is 0.89 for the original
+mask and 0.86 for masked v2. Voltage-sensor distributions narrow consistently. The original QQQ mask is
+the principal exception, with localized broadening and shifts at the intracellular gate; this response
+is reduced in masked v2.
+
+Masking should therefore not be described as universally diversity enhancing. In Nav1.5, its effect is
+region and mask-design dependent. RMSD clustering and focused IFM-receptor contact analysis are needed
+to determine whether narrower marginal distributions still contain distinct coordinated states.
+
+Gate openness and coordinated IFM-latch sampling
+
+In vanilla predictions, IFM-to-QQQ replacement produces a clear bias toward disengagement of the
+inactivation motif. The mean of the two latch distances shifts from 11.92 Å in WT to 28.99 Å in QQQ,
+whereas the median maximum intracellular-gate span increases more modestly from 15.76 to 16.03 Å.
+The gate-latch correlation within vanilla QQQ is weak (Spearman rho = 0.13), indicating that the strong
+latch displacement is not tightly coupled to progressive gate opening across individual models.
+
+Under masked v2 prediction, both WT and QQQ occupy the long-distance latch regime (29.38 and 29.13 Å,
+respectively). The masked QQQ gate is nevertheless larger than masked WT (16.81 versus 16.07 Å) and
+more variable. Gate-latch coordination is moderate in both masked ensembles (rho = 0.36 for WT and
+0.31 for QQQ). Masking therefore promotes a coordinated disengaged-latch/gate ensemble, but the
+disengaged latch is no longer QQQ-specific because masked WT undergoes the same large shift.
+
+The mutation-specific state bias is consequently clearest in vanilla: QQQ strongly favors an
+unlatched geometry relative to WT. In masked v2, the larger gate sampled by QQQ may represent an
+additional mutant effect, but the latch-state shift itself is predominantly a masking effect shared
+with WT. These geometric assignments remain preliminary and should not be equated directly with a
+functional open or inactivated state until RMSD clustering and structural inspection confirm the
+corresponding global conformations.
+
+IFM masking and residual MSA information
+
+The masking labels describe different MSA-masking profiles, not different Nav1.5 sequences.
+WT masked v2 and WT masked-v2-noIFM both retain the native IFM amino-acid sequence. In the noIFM
+control, the IFM residues are excluded from the masked region, so evolutionary information at the
+IFM itself is retained. The QQQ datasets retain the QQQ sequence, while vanilla, masked, and masked-v2
+conditions differ in how much MSA information remains around the latch region.
+
+Using the descriptive two-contact classification, WT vanilla contains a substantial partially engaged
+population: 57.4% of models have one IFM contact at or below 12 Å, 42.5% have both contacts above
+12 Å, and 0.1% satisfy the strict two-contact latch-like definition. QQQ vanilla still retains a small
+partially engaged population of 5.3%, despite 94.7% being fully disengaged. This residual population is
+consistent with the possibility that unmasked evolutionary information biases the model toward the
+canonical latch pocket even when QQQ cannot reproduce the native hydrophobic interaction.
+
+The WT noIFM control does not, however, rescue latch engagement under the present analysis. WT masked
+v2 is 96.7% fully disengaged and WT masked-v2-noIFM is 97.7% fully disengaged; their partially engaged
+fractions are 3.3% and 2.3%, respectively. Retaining IFM-site MSA information alone is therefore
+insufficient to recover the WT-vanilla latch distribution. This may mean that evolutionary constraints
+elsewhere in the receptor pocket or surrounding domains are required for latching, that the broader v2
+mask dominates the local IFM signal, or that the two chosen Cα contacts do not capture every valid
+latch geometry. The current data support residual MSA-driven placement in QQQ vanilla as a hypothesis,
+but they do not yet establish it mechanistically.
+
+Voltage-sensor bias relative to WT
+
+IFM-to-QQQ replacement does not produce a uniform VSD contraction. Across the eight shared VSD
+landmarks, the median mutant-minus-WT shift is -0.005 Å in vanilla and -0.010 Å in masked v2. Four
+contacts become shorter and four become longer in vanilla; masked v2 contains four shorter, two
+longer, and two essentially unchanged contacts. The distributions also retain nearly identical
+interquartile ranges to WT.
+
+The largest vanilla effects are opposing changes within domain III: F934-R984 becomes shorter by
+0.15 Å, whereas F934-K1000 becomes longer by 0.34 Å. Under masked v2 every median VSD shift is within
+0.05 Å of WT. The QQQ mutation therefore strongly biases IFM-latch engagement but has little consistent
+effect on the VSD landmarks. Masking further suppresses the pair-specific vanilla differences rather
+than revealing a closer global voltage-sensor state.

@@ -1,0 +1,55 @@
+Kv2.1 preliminary results
+
+Kv2.1 provides the clearest evidence that masking broadens the predicted structural ensemble. The
+median masked-to-vanilla standard-deviation ratio is 1.42 for WT, 1.69 for L403A, and 1.73 for F412L
+after trajectory-level pore–VSD interface QC. Approximately 94–95% of shared distances become more
+variable. Median interquartile ranges increase by factors of 3.18, 2.30, and 3.00, respectively.
+
+Broadening is strongest in S6, the intracellular gate, and the voltage sensors. The S6 profile shows
+median standard-deviation increases of 3.50-fold for WT, 2.08-fold for L403A, and 1.92-fold for F412L.
+The selectivity filter changes less, indicating that the result is not dominated by gross tetramer
+disruption after structural quality control.
+
+WT S6 geometry remains close to experimental WT structure 8SD3. L403A becomes more heterogeneous but
+does not reproduce the contracted median S6 profile observed in 8SDA. Masking therefore increases
+access to alternative geometries, but broader sampling and recovery of a mutation-specific experimental
+state remain separate outcomes.
+
+Gate openness and coordinated state sampling
+
+L403A is biased toward a slightly larger intracellular-gate span than protocol-matched WT in both
+vanilla (+0.27 Å) and masked (+0.23 Å) ensembles. Its distal-S6 V409 span is also larger in both
+conditions (+0.22 Å in vanilla and +0.29 Å when masked). Gate and distal-S6 geometry remain positively
+correlated within L403A (Spearman rho = 0.51 in vanilla and 0.35 when masked), supporting a coordinated
+shift rather than independent broadening. The direction is present without masking, while masking
+mainly expands the range of available geometries. This does not mean that the ensemble reproduces the
+8SDA L403A experimental state, whose contracted S6 profile remains distinct from the predicted median.
+
+F412L shows the opposite median bias. Its gate is smaller than protocol-matched WT by 0.66 Å in
+vanilla and 0.83 Å when masked, while the distal-S6 V409 span is lower by 0.60 Å and 0.96 Å,
+respectively. The contracted bias therefore occurs in both protocols and becomes stronger with
+masking. However, model-by-model gate-S6 coordination is weak in vanilla F412L (rho = 0.16) and weakly
+negative when masked (rho = -0.20). Masked F412L samples a much wider range, but that extra variability
+does not follow a single coherent opening or closing coordinate.
+
+The two mutants are therefore state-biased in different directions in both vanilla and masked
+predictions. L403A shows the clearer coordinated gate-S6 displacement, whereas F412L shows the larger
+mask-dependent expansion without equivalent internal coordination.
+
+Voltage-sensor bias relative to WT
+
+F412L is the only mutant in the present set with a consistent shift toward shorter VSD landmark
+distances. Both shared chain-A contacts are shorter than WT in both protocols. F236-R289 changes by
+-0.02 Å in vanilla and -0.03 Å when masked, while F236-R308 changes by -0.13 Å and -0.09 Å,
+respectively. The direction is therefore already present in vanilla and is retained, rather than
+created or strongly amplified, by masking. The magnitude is small, so this supports a subtle VSD
+contraction rather than assignment to a distinct voltage-sensor state.
+
+L403A does not show the same behavior. In vanilla, F236-R289 is shorter by 0.05 Å but F236-R308 is
+longer by 0.01 Å. Under masking both contacts are longer by approximately 0.03 Å. These small mixed
+changes provide no evidence for a uniform L403A VSD contraction.
+
+Only chain A is used for this cross-protocol test because the WT vanilla CSV does not provide the
+corresponding four-chain VSD block. The conclusion is therefore limited to the two shared F236-R289
+and F236-R308 landmarks and should not be generalized to all four voltage sensors without additional
+matched measurements.
