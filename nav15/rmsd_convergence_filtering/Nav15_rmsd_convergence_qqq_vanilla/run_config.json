@@ -1,0 +1,74 @@
+{
+  "execution_date_utc": "2026-07-16T01:52:55.265478+00:00",
+  "input_dir": "/quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/qqq/vanilla",
+  "output_dir": "/quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/Nav15_rmsd_convergence_qqq_vanilla",
+  "command": "af2_recycle_rmsd_convergence.py --input-dir /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/qqq/vanilla/ --output-dir ../../Nav1.5/Nav15_rmsd_convergence_qqq_vanilla --config config_nav15.json --workers 4",
+  "workers": 4,
+  "python_version": "3.11.15",
+  "numpy_version": "2.4.6",
+  "pandas_version": "3.0.3",
+  "biopython_version": "1.87",
+  "configuration": {
+    "system_name": "NaV1.5",
+    "expected_chains": [
+      "A"
+    ],
+    "condition_patterns": {
+      "WT": "(^|[/_.-])wt([/_.-]|$)",
+      "QQQ": "qqq"
+    },
+    "protocol_patterns": {
+      "masked": "masked(?:AF2)?",
+      "vanilla": "vanilla(?:AF2)?"
+    },
+    "stable_core": [
+      [
+        132,
+        282
+      ],
+      [
+        359,
+        426
+      ],
+      [
+        505,
+        665
+      ],
+      [
+        690,
+        749
+      ],
+      [
+        870,
+        1112
+      ],
+      [
+        1128,
+        1164
+      ],
+      [
+        1200,
+        1405
+      ],
+      [
+        1429,
+        1466
+      ]
+    ],
+    "thresholds": {
+      "consecutive_rmsd_threshold_A": 5.0,
+      "minimum_alignment_coverage": 0.9,
+      "sensitivity_thresholds_A": [
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        8.0
+      ]
+    }
+  },
+  "discovered_pdb_files": 6000,
+  "trajectory_count": 500,
+  "all_ok_model_count": 5500,
+  "selected_trajectory_count": 500
+}

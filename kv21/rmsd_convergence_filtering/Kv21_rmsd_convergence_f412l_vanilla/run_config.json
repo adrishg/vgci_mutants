@@ -1,0 +1,50 @@
+{
+  "execution_date_utc": "2026-07-16T14:23:26.585040+00:00",
+  "input_dir": "/quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/f412l/vanilla",
+  "output_dir": "/quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/Kv21_rmsd_convergence_f412l_vanilla",
+  "command": "af2_recycle_rmsd_convergence.py --input-dir /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/f412l/vanilla/ --output-dir ../../Kv2.1/Kv21_rmsd_convergence_f412l_vanilla --config config_kv21.json --workers 4",
+  "workers": 4,
+  "python_version": "3.11.15",
+  "numpy_version": "2.4.6",
+  "pandas_version": "3.0.3",
+  "biopython_version": "1.87",
+  "configuration": {
+    "system_name": "Kv2.1",
+    "expected_chains": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "condition_patterns": {
+      "WT": "(^|[/_.-])wt([/_.-]|$)",
+      "L403A": "l403a",
+      "F412L": "f412l"
+    },
+    "protocol_patterns": {
+      "masked": "masked(?:AF2)?",
+      "vanilla": "vanilla(?:AF2)?"
+    },
+    "stable_core": [
+      [
+        184,
+        422
+      ]
+    ],
+    "thresholds": {
+      "consecutive_rmsd_threshold_A": 5.0,
+      "minimum_alignment_coverage": 0.9,
+      "sensitivity_thresholds_A": [
+        3.0,
+        4.0,
+        5.0,
+        6.0,
+        8.0
+      ]
+    }
+  },
+  "discovered_pdb_files": 6000,
+  "trajectory_count": 500,
+  "all_ok_model_count": 5352,
+  "selected_trajectory_count": 500
+}
