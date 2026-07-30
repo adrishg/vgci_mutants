@@ -73,3 +73,45 @@ These values indicate severe atomic overlap rather than a credible noncovalent c
 especially strong under masking and may contribute to apparent local shifts in G406R. Structural
 inspection and side-chain relaxation are required before interpreting this pair or using the G406R
 shortest-distance ensemble mechanistically.
+
+Integrated preliminary interpretation
+
+Taken together, the global, VSD, gate, and mutation-site analyses favor a local-repacking model for
+both Cav1.2 mutants. G402S and G406R already alter their immediate S6-interface geometry in vanilla
+predictions, and those directions are generally retained under masking. Masking mainly changes the
+width and partner preference of the local ensembles rather than creating a new mutant state or a
+consistent bias toward a more open pore. G402S has the weaker effect and exchanges a WT G402-M1524
+proximity for an intermittent S402-I1523 contact. G406R has the stronger and more chemically specific
+effect, sampling alternative acidic partners D1528 and D1533, but its especially short R406-T1531
+distances reveal a concurrent steric-quality problem. The most defensible current conclusion is
+therefore that targeted masking exposes additional local solutions around the mutant sites while
+largely preserving the median global channel geometry. The G406R contact mechanism should remain
+provisional until relaxation or structural inspection removes models with atomic overlap.
+
+RMSF redistribution relative to the targeted masks
+
+These values were recomputed from the final allOK3 ensembles and supersede the legacy all-model RMSF
+profiles for quantitative interpretation. The analysis includes 39,986 accepted model snapshots:
+4,995 G402S masked, 5,000 G402S vanilla, 4,997 G406R masked, 5,000 G406R vanilla, 4,998 G490R masked,
+5,000 G490R vanilla, 4,996 WT masked, and 5,000 WT vanilla.
+
+The filtered result supports a small, localized redistribution rather than broad destabilization.
+Median masked-minus-vanilla RMSF within directly masked residues is +0.054 Å for G402S, +0.021 Å for
+G406R, +0.042 Å for G490R, and +0.028 Å for WT. Outside the direct masks, the corresponding medians
+are -0.003, -0.009, -0.015, and -0.021 Å. Only 47.3% of G490R and 48.1% of G406R residues increase,
+compared with 51.3% for G402S and 44.0% for WT. Masking therefore does not increase RMSF uniformly
+across CaV1.2; it slightly releases the targeted regions while maintaining or mildly reducing
+variability through much of the remaining channel.
+
+The provisional topology summaries also contain opposing regional effects. For example, WT DI S4
+increases by approximately +0.73 Å and DII S1 by +0.11 Å, whereas DIII S1 decreases by approximately
+-0.13 Å and the proposed DIV S4 interval by -2.33 Å. These annotations are educated sequence-based
+boundaries and should be checked before residue-level mechanistic claims. The important robust result
+is the coexistence of local gains and distal losses, which is more consistent with redistribution of
+ensemble variability than with global expansion.
+
+Because this pattern is present in WT as well as the mutants, it contains a substantial
+protocol-dependent component. Mutation-specific interpretation should therefore rely on the
+mutation-centered contact, distance, and reference-RMSD analyses rather than RMSF magnitude alone.
+G490R remains best treated as a supplemental exploratory condition until its structural states are
+supported by clustering and independent experimental comparison.

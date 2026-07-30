@@ -72,3 +72,105 @@ The largest vanilla effects are opposing changes within domain III: F934-R984 be
 0.05 Å of WT. The QQQ mutation therefore strongly biases IFM-latch engagement but has little consistent
 effect on the VSD landmarks. Masking further suppresses the pair-specific vanilla differences rather
 than revealing a closer global voltage-sensor state.
+
+Shortest heavy-atom latch distances
+
+The shortest-distance analysis independently supports the separation between WT vanilla and all
+other Nav1.5 ensembles. In WT vanilla, the median shortest distances from the central F1486-equivalent
+residue to N1659 and N1765 are 10.0 Å and 13.8 Å, and the shortest distance from any IFM residue to
+N1659 is 9.6 Å. In WT masked v2, these medians increase to 28.1, 32.0, and 22.4 Å. Retaining IFM-site
+MSA information in WT masked-v2-noIFM gives nearly the same values (27.9, 31.4, and 22.2 Å), confirming
+that this control does not restore the WT-vanilla motif placement.
+
+QQQ vanilla and both QQQ masks occupy the same long-distance heavy-atom regime. Their median central
+motif-to-N1659 distances range from 27.2 to 27.9 Å, central motif-to-N1765 distances from 31.1 to
+31.8 Å, and whole-motif-to-N1659 distances from 22.0 to 22.5 Å. Thus, the shortest-distance result is
+not driven by the choice of Cα atoms and strengthens the conclusion that QQQ and masked WT displace
+the motif away from the tested receptor coordinates.
+
+Importantly, essentially none of the ensembles, including WT vanilla, place these tested heavy-atom
+pairs within 4 Å. The Cα-based “partially engaged” WT-vanilla population should therefore be
+interpreted as a closer backbone placement toward the latch region, not as evidence of a resolved
+direct side-chain contact to N1659 or N1765. This also explains why the current two-coordinate
+classification identifies very few strictly latch-like models despite the clear relative separation
+of WT vanilla. The most robust present claim is comparative: WT vanilla uniquely favors a
+latch-proximal motif geometry, whereas QQQ mutation or v2 masking shifts both backbone and heavy-atom
+coordinates into a disengaged regime. Identification of the actual closest receptor-side partners is
+still needed before assigning a specific physical latch interaction.
+
+Expanded experimental-state comparison
+
+The IFM coordinate reference set now includes the full-length human open structures 8VYJ and 8VYK,
+human E1784K intermediate-inactivated structure 7DTC, rat BTX-B-stabilized open comparator 8T6L, and
+rat reference structure 6UZ3. Their central IFM-to-N1659 and IFM-to-N1765 Cα distances are,
+respectively: 8VYJ, 8.037 and 9.896 Å; 8VYK, 7.782 and 10.316 Å; 7DTC, 6.743 and 9.072 Å; 8T6L,
+6.764 and 8.585 Å; and 6UZ3, 7.028 and 9.304 Å. Human structures use canonical F1486/N1659/N1765
+numbering, whereas the rat structures use the sequence-verified +2 correspondence
+F1488/N1661/N1767.
+
+All five calculable structures remain within the descriptive two-contact latch-proximal region despite
+spanning native open, intermediate-inactivated, and toxin-stabilized open conditions. This is an
+important interpretive constraint: displacement of the IFM motif is not required for experimental
+pore opening, and the long-distance masked WT population should not be labeled an open state on the
+basis of IFM disengagement alone. Instead, the new full-length structures support a model in which the
+IFM motif can be repositioned while remaining receptor proximal, with pore opening, VSD activation,
+and CTD–III/IV-linker coupling providing additional state coordinates.
+
+The rat 7FBS QQQ structure cannot be placed on the same IFM-coordinate plot. The engineered
+III–IV-linker/QQQ motif positions are not modeled in the deposited coordinates, so neither IFM1 nor
+IFM2 can be calculated without fabrication. 7FBS remains a valuable pore-open reference for gate and
+S6 distances, but not a direct experimental QQQ-latch point.
+
+RMSF redistribution relative to the targeted masks
+
+These values were recomputed from the final allOK3 ensembles and supersede the legacy all-model RMSF
+profiles for quantitative interpretation. The analysis includes 34,998 accepted model snapshots:
+4,999 QQQ standard masked, 5,000 QQQ masked v2, 5,000 QQQ vanilla, 5,000 WT standard masked, 4,999
+WT masked v2, 5,000 WT masked v2-noIFM, and 5,000 WT vanilla.
+
+Nav1.5 shows a modest but reproducible redistribution beyond the directly masked residues. Under the
+standard mask, median masked-minus-vanilla RMSF is +0.056 Å inside the WT mask and +0.031 Å outside
+it; for QQQ the corresponding values are +0.055 and +0.042 Å. The v2 profiles have smaller distal
+effects: +0.048 Å inside and +0.008 Å outside for WT, and +0.042 and +0.006 Å for QQQ. WT v2-noIFM
+shows +0.056 Å inside its direct mask and only +0.004 Å outside. Thus, the standard mask produces the
+strongest channel-wide redistribution, whereas v2 confines most of the increase more closely to the
+targeted regions.
+
+The provisional segment analysis shows that this response is selective rather than a uniform
+increase. DI and portions of DII generally gain variability under the standard mask, while other
+segments change little or decrease. The IFM motif remains the strongest local decrease; for WT
+standard masking its median masked-minus-vanilla RMSF is -7.71 Å. The masked ensemble therefore
+places the motif in a less variable but strongly displaced long-distance regime. Retaining IFM-site
+MSA information in the v2-noIFM protocol does not by itself restore the vanilla latch position.
+
+These findings support redistribution of conformational sampling beyond the exact mask boundaries,
+but they do not establish directional propagation from the mask to a downstream segment. The similar
+DI and DII responses across WT and QQQ indicate a substantial protocol-wide component. The IFM result
+is more specific and biologically relevant: masking can reduce the spread of the motif while shifting
+its entire ensemble away from the experimentally latch-proximal region. RMSD clustering and
+three-dimensional coupling analyses are needed to distinguish coherent state changes from alignment
+or coverage effects.
+
+Reconciling QQQ placement with reduced masked RMSF
+
+The direction of an RMSF change should not be equated with functional improvement. In Nav1.5, masking
+often lowers RMSF at the IFM/QQQ motif even though the motif is farther from the experimental latch
+pocket. The masked ensembles are therefore not sampling a narrower distribution around the native
+bound geometry; they are sampling a narrower distribution around a displaced, disengaged geometry.
+Reduced RMSF in this case reflects more consistent misplacement rather than stronger latching.
+
+QQQ vanilla provides a useful contrast. Although 94.7% of its models are fully disengaged by the
+descriptive two-contact classification, 5.3% retain one latch-proximal Cα coordinate. A plausible
+interpretation is that the intact MSA still contains evolutionary information associated with placing
+the III-IV linker near the canonical IFM receptor pocket. AlphaFold can partially reproduce that
+learned backbone placement even after IFM is replaced by QQQ. This would represent an evolutionary
+prior for where the motif normally belongs, not evidence that glutamine residues recreate the native
+hydrophobic latch.
+
+The heavy-atom analysis limits the strength of this claim. QQQ vanilla remains in the same
+long-distance regime as masked QQQ, with no recurrent direct contact to the tested N1659/N1765
+coordinates. Thus, the present data are consistent with residual MSA information weakly biasing a
+small fraction of QQQ vanilla structures toward the latch region, but not with recovery of physical
+QQQ binding. Masking removes or redistributes that placement signal and produces a more consistently
+disengaged motif. This distinction explains why masking can reduce local RMSF while simultaneously
+moving the ensemble farther from experimentally latch-proximal Nav1.5 structures.

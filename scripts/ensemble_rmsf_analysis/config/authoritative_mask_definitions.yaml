@@ -1,0 +1,70 @@
+numbering: 1-based raw AlphaFold query/model residue numbering
+authority: User-supplied authoritative RMSF mask table
+
+mask_definitions:
+  kv21_common:
+    raw_length: 600
+    ranges: "288-328, 370-384, 401-417"
+    expected_count: 73
+
+  nav15_standard:
+    raw_length: 1572
+    ranges: "159, 162, 165, 172, 198, 209, 220, 223, 226, 229, 231-270, 370-376, 407-419, 524, 541, 550-551, 554, 557, 560, 564, 567, 571, 586, 589, 599, 612, 615, 618, 621, 624-663, 701-707, 736-748, 887, 892, 909, 914-915, 924, 927, 930, 934, 937, 941, 959, 964, 984, 987, 990, 993, 996, 999-1039, 1100-1106, 1147-1157, 1215, 1232, 1234, 1248, 1251, 1255, 1258, 1262, 1276, 1279, 1294, 1307, 1310, 1313, 1316, 1319, 1322-1361, 1392-1398, 1451-1453, 1455-1456, 1460"
+    expected_count: 293
+
+  nav15_v2:
+    raw_length: 1572
+    ranges: "159, 162, 165, 172, 198, 209, 220, 223, 226, 229, 231-239, 246-257, 267-270, 370-376, 407-419, 524, 541, 550-551, 554, 557, 560, 564, 567, 571, 586, 589, 599, 612, 615, 618, 621, 624-630, 640-649, 660-663, 701-707, 736-748, 887, 892, 909, 914-915, 924, 927, 930, 934, 937, 941, 959, 964, 984, 987, 990, 993, 996, 999-1002, 1100-1106, 1147-1157, 1164-1176, 1215, 1232, 1234, 1248, 1251, 1255, 1258, 1262, 1276, 1279, 1294, 1307, 1310, 1313, 1316, 1319, 1358-1361, 1392-1398"
+    expected_count: 193
+
+  nav15_v2_noIFM:
+    raw_length: 1572
+    base: nav15_v2
+    remove_ranges: "1164-1176"
+    expected_count: 180
+
+  nav15_standard_plus_IFM:
+    raw_length: 1572
+    base: nav15_standard
+    add_ranges: "1164-1176"
+    expected_count: 306
+
+  cav12_wt_common:
+    raw_length: 1685
+    ranges: "127, 160, 163, 173, 199, 213, 235-287, 401, 407-412, 557, 570, 594, 602, 607, 617-671, 750, 753, 755, 757, 937, 947, 993, 1013-1068, 1181, 1185, 1187, 1189, 1242, 1275, 1285, 1301, 1307, 1317, 1369-1426, 1519, 1521-1522, 1524, 1527, 1533"
+    expected_count: 263
+
+  cav12_g402s:
+    raw_length: 1685
+    base: cav12_wt_common
+    add_ranges: "397-400, 402-406"
+    expected_count: 272
+
+  cav12_g406r:
+    raw_length: 1685
+    base: cav12_wt_common
+    add_ranges: "402-406"
+    expected_count: 268
+
+  cav12_g490r:
+    raw_length: 1685
+    base: cav12_wt_common
+    add_ranges: "485-495"
+    expected_count: 274
+
+datasets:
+  kv21:
+    wt_masked: {mask: kv21_common}
+    l403a_masked: {mask: kv21_common, mutation_position: 405}
+    f412l_masked: {mask: kv21_common, mutation_position: 414}
+  nav15:
+    wt_masked: {mask: nav15_standard}
+    wt_masked_v2: {mask: nav15_v2}
+    wt_masked_v2_noIFM: {mask: nav15_v2_noIFM}
+    qqq_masked: {mask: nav15_standard_plus_IFM, mutation_ranges: "1169-1171"}
+    qqq_masked_v2: {mask: nav15_v2, mutation_ranges: "1169-1171"}
+  cav12:
+    wt_masked: {mask: cav12_wt_common}
+    g402s_masked: {mask: cav12_g402s, mutation_position: 402}
+    g406r_masked: {mask: cav12_g406r, mutation_position: 406}
+    g490r_masked: {mask: cav12_g490r, mutation_position: 490}

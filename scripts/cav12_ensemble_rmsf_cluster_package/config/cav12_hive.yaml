@@ -1,0 +1,133 @@
+project:
+  name: CaV1.2 ensemble RMSF
+  channel: CaV1.2
+  project_root: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2
+  output_root: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/ensemble_rmsf_results
+
+# Raw numbering used by the shortened AlphaFold constructs. The uploaded
+# example model contains one chain A with residues 1-1685.
+residue_axis:
+  start: 1
+  end: 1685
+
+model_chain: A
+
+sequence_fastas:
+  wt: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/wt/cav12_wt_short.fasta
+  g402s: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/g402s/cav12_short_g402s.fasta
+  g406r: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/g406r/cav12_g406r_short.fasta
+  g490r: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/g490r/cav12_g490r_short.fasta
+
+# Structure discovery is recursive, so datasets work whether PDB files are
+# directly inside each folder or inside a models/ subdirectory.
+datasets:
+  - name: wt_vanilla
+    sequence_condition: wt
+    protocol: vanilla
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/wt/vanilla
+  - name: wt_masked
+    sequence_condition: wt
+    protocol: masked
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/wt/masked
+  - name: g402s_vanilla
+    sequence_condition: g402s
+    protocol: vanilla
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/g402s/vanilla
+  - name: g402s_masked
+    sequence_condition: g402s
+    protocol: masked
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/g402s/masked
+  - name: g406r_vanilla
+    sequence_condition: g406r
+    protocol: vanilla
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/g406r/vanilla
+  - name: g406r_masked
+    sequence_condition: g406r
+    protocol: masked
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/g406r/masked
+  - name: g490r_vanilla
+    sequence_condition: g490r
+    protocol: vanilla
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/g490r/vanilla
+  - name: g490r_masked
+    sequence_condition: g490r
+    protocol: masked
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/g490r/masked
+
+references:
+  # All models and references are placed in one common coordinate frame defined
+  # by 8WE6, the highest-resolution uploaded CaV1.2 structure. Every profile is
+  # evaluated against every reference without local re-fitting.
+  anchor_id: 8WE6
+  structures:
+    - id: 8WE6
+      state: human_CaV1.2_high_resolution_reference
+      relationship: common_coordinate_anchor_and_primary_WT_reference
+      species: human
+      sequence_condition: wt
+      path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/experimental/8WE6.pdb
+      chain: A
+    - id: 8HLP
+      state: human_CaV1.2_apo_reference
+      relationship: secondary_WT_state_reference
+      species: human
+      sequence_condition: wt
+      path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/experimental/8HLP.pdb
+      chain: A
+    - id: 8FD7
+      state: human_CaV1.2_gabapentin_complex
+      relationship: secondary_ligand_bound_WT_reference
+      species: human
+      sequence_condition: wt
+      path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Cav1.2/experimental/8FD7.pdb
+      chain: K
+
+# Derived from the established CaV1.2 recycle-convergence stable core, with the
+# mutation-centered IS6 segment around G402/G406 removed from the fit. G490 is
+# already outside the established core. One rigid transformation is applied to
+# the complete 1-1685 model, so all loops, S4-S5 linkers, pore helices, S6
+# segments, mutation-centered regions, and termini remain in the RMSF output.
+alignment_core:
+  name: stable_core_excluding_IS6_mutation_window
+  raw_ranges:
+    - [112, 381]
+    - [524, 759]
+    - [901, 1145]
+    - [1160, 1197]
+    - [1239, 1323]
+    - [1370, 1534]
+  minimum_matched_ca: 850
+  minimum_coverage: 0.80
+
+# Exact masking ranges are deliberately deferred. The expensive alignment and
+# complete raw profiles do not require them; they can be merged locally later.
+annotations:
+  raw_regions:
+    - name: G402_mutation_site
+      raw_start: 402
+      raw_end: 402
+    - name: G406_mutation_site
+      raw_start: 406
+      raw_end: 406
+    - name: G490_mutation_site
+      raw_start: 490
+      raw_end: 490
+    - name: IS6_mutation_window
+      raw_start: 382
+      raw_end: 426
+    - name: G490_centered_window
+      raw_start: 470
+      raw_end: 510
+
+sequence_alignment:
+  match_score: 2.0
+  mismatch_score: -1.0
+  open_gap_score: -10.0
+  extend_gap_score: -0.5
+  end_gap_score: 0.0
+
+analysis:
+  recursive: true
+  minimum_residue_coverage: 0.80
+  coordinate_dtype: float32
+  default_array_tasks: 100

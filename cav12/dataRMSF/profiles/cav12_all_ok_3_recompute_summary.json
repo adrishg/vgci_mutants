@@ -1,0 +1,22 @@
+{
+  "channel": "cav12",
+  "selection": "all_ok_3",
+  "aligned_models": 48000,
+  "selected_models": 39986,
+  "output": "cav12/dataRMSF/profiles/cav12_all_ok_3_per_residue_profiles.csv",
+  "validation": {
+    "dataset": "g402s_masked",
+    "max_abs_delta_A": 9.755588004090043e-11,
+    "median_abs_delta_A": 6.1494143110962796e-12
+  },
+  "selected_by_dataset": {
+    "g402s_masked": 4995,
+    "g402s_vanilla": 5000,
+    "g406r_masked": 4997,
+    "g406r_vanilla": 5000,
+    "g490r_masked": 4998,
+    "g490r_vanilla": 5000,
+    "wt_masked": 4996,
+    "wt_vanilla": 5000
+  }
+}

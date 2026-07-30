@@ -1,0 +1,14 @@
+{
+  "manifest_rows": 35994,
+  "shard_rows_found": 35994,
+  "missing_rows": 0,
+  "successful_alignments": 35994,
+  "failed_alignments": 0,
+  "coordinates_shape": [
+    35994,
+    4,
+    600,
+    3
+  ],
+  "coordinate_dtype": "float32"
+}

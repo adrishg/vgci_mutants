@@ -79,7 +79,7 @@ any additional variability is localized and experimentally meaningful.
 |---|---|---|---|
 | Cav1.2 | WT, G402S, G406R | 8FD7, 8HLP, 8WE6 | Does masking broaden voltage-sensor or gate geometry near disease-associated mutations? |
 | Kv2.1 | WT, L403A, F412L | 8SD3, 8SDA; 9O10–9O13 as state references | Does masking expand the S6, gate, and voltage-sensor ensemble while preserving an assembled pore? |
-| Nav1.5 | WT, IFM→QQQ | 6UZ3, 7FBS, 8VYJ, 8VYK | Does masking alter pore geometry or IFM-coupled inactivation contacts? |
+| Nav1.5 | WT, IFM→QQQ | 6UZ3, 7FBS, 7DTC, 8T6L, 8VYJ, 8VYK | Does masking alter pore geometry or IFM-coupled inactivation contacts? |
 
 ## Preliminary conclusions
 
@@ -112,32 +112,90 @@ Channel-specific interpretations are available here:
 
 ```text
 .
+├── SamplingDepth_AllOK3_vs_First100.ipynb
 ├── cav12/
 │   ├── Cav12_distanceDistribution_vsExperimental.ipynb
 │   ├── Cav12_G402S_mutationSite_analysis.ipynb
 │   ├── Cav12_G406R_mutationSite_analysis.ipynb
+│   ├── Cav12_WT_experimental_RMSD.ipynb
+│   ├── Cav12_G402S_experimental_RMSD.ipynb
+│   ├── Cav12_G406R_experimental_RMSD.ipynb
+│   ├── Cav12_ensemble_RMSF.ipynb
 │   ├── dataDistances/
+│   ├── dataRMSD/
+│   ├── dataRMSF/
+│   ├── rmsd_convergence_filtering/
+│   ├── rmsd_filtered_distances/
 │   └── experimentals/
 ├── kv21/
 │   ├── Kv21_distanceDistribution_vsExperimental.ipynb
 │   ├── Kv21_L403A_mutationSite_analysis.ipynb
 │   ├── Kv21_F412L_mutationSite_analysis.ipynb
+│   ├── Kv21_WT_mutants_RMSD_comparison.ipynb
+│   ├── Kv21_WT_experimental_RMSD.ipynb
+│   ├── Kv21_L403A_experimental_RMSD.ipynb
+│   ├── Kv21_F412L_experimental_RMSD.ipynb
+│   ├── Kv21_ensemble_RMSF.ipynb
 │   ├── dataDistances/
+│   ├── dataRMSD/
+│   ├── dataRMSF/
+│   ├── rmsd_convergence_filtering/
+│   ├── rmsd_filtered_distances/
+│   ├── rmsd_threshold_sensitivity/
 │   └── experimental/
 ├── nav15/
 │   ├── Nav15_distanceDistribution_vsExperimental.ipynb
 │   ├── Nav15_QQQ_mutationSite_analysis.ipynb
 │   ├── Nav15_IFM_latching_analysis.ipynb
+│   ├── Nav15_WT_experimental_RMSD.ipynb
+│   ├── Nav15_QQQ_experimental_RMSD.ipynb
+│   ├── Nav15_ensemble_RMSF.ipynb
 │   ├── dataDistances/
+│   ├── dataRMSD/
+│   ├── dataRMSF/
+│   ├── rmsd_convergence_filtering/
+│   ├── rmsd_filtered_distances/
 │   └── experimental/
+├── docs/
+│   ├── FIGURE_INDEX.md
+│   ├── audits/
+│   ├── status/
+│   └── workflows/
 ├── shared/
 │   ├── dataset_selection.py
 │   ├── experimental_overlays.py
+│   ├── structure_distances.py
+│   ├── kv21_experimental.py
+│   ├── nav15_latching.py
 │   ├── mutation_site_analysis.py
+│   ├── sampling_depth_analysis.py
+│   ├── rmsd_analysis.py
 │   └── plotting.py
-├── filter_all_distance_csvs_from_rmsd.py
-└── refilter_distances_at_custom_rmsd.py
+└── scripts/
+    ├── filtering/
+    │   ├── filter_all_distance_csvs_from_rmsd.py
+    │   └── refilter_distances_at_custom_rmsd.py
+    ├── ensemble_rmsf_analysis/
+    ├── nav15_distance_generation/
+    ├── cav12_ensemble_rmsf_cluster_package/
+    ├── kv21_ensemble_rmsf_cluster_package/
+    └── nav15_ensemble_rmsf_cluster_package/
 ```
+
+## Documentation
+
+The root contains only this project overview. Supporting documentation is grouped under `docs/`:
+
+- [Figure and notebook index](docs/FIGURE_INDEX.md)
+- [Experimental-comparison RMSD workflow](docs/workflows/RMSD_WORKFLOW.md)
+- [Final presentation and consistency audit](docs/status/PRESENTATION_AUDIT.md)
+- [Current RMSF analysis status](docs/status/RMSF_ANALYSIS_STATUS.md)
+- [Production A3M provenance](docs/status/A3M_PROVENANCE.md)
+- [Nav1.5 retrospective distance audit](docs/audits/NAV15_DISTANCE_RETROSPECTIVE_AUDIT.md)
+
+Operational instructions and validation records remain beside the scripts they document. In
+particular, the channel-specific cluster packages retain their own `README.md` and `VALIDATION.md`
+files so that each package remains self-contained when transferred to the cluster.
 
 ## Dataset conventions
 
@@ -225,25 +283,45 @@ Recommended order:
 1. Run the channel-level distance notebook.
 2. Confirm the selected dataset printed by the loading cell.
 3. Run the corresponding mutation-site notebook.
-4. For Nav1.5, run the IFM-latching notebook after the main channel analysis.
-5. Review warnings for missing columns or unresolved experimental residues before interpreting plots.
+4. Run the channel RMSF notebook to compare ensemble variability across the complete sequence.
+5. Run the experimental RMSD notebook for the relevant sequence; for Kv2.1, begin with
+   `Kv21_WT_mutants_RMSD_comparison.ipynb` for the cross-condition view.
+6. For Nav1.5, run the IFM-latching notebook after the main channel analysis.
+
+The root-level `SamplingDepth_AllOK3_vs_First100.ipynb` is a sampling-depth sensitivity analysis. It
+compares each complete final-QC ensemble with a deterministic 100-trajectory subset drawn from that
+same retained ensemble. It therefore estimates what the apparent distributions might have looked like
+with shallower sampling; it is not a chronological comparison or an independent biological replicate.
+7. Review warnings for missing columns, rejected mappings, or unresolved experimental residues before
+   interpreting plots.
+
+All presentation notebooks live directly inside their channel directory. The `dataDistances/`,
+`dataRMSD/`, and `dataRMSF/` directories contain inputs and generated tables or figures, while
+reusable analysis functions and notebook generators remain under `shared/` and `scripts/`.
+Compact RMSD validation records, including model-join diagnostics and unmatched-model reports, are
+stored under each channel's `dataRMSD/qc/` directory.
+
+Python modules imported directly by notebooks belong in `shared/`. Executable programs that generate,
+filter, validate, package, or regenerate data belong in `scripts/`. Cluster submission files and
+transfer archives are kept with the corresponding generation workflow rather than inside a channel's
+presentation or experimental-structure directory.
 
 The notebooks require Python with pandas, NumPy, Matplotlib, Seaborn, and Biopython.
 
 ## Filtering and reproducibility
 
-`refilter_distances_at_custom_rmsd.py` rebuilds filtered distance tables from stored RMSD manifests
+`scripts/filtering/refilter_distances_at_custom_rmsd.py` rebuilds filtered distance tables from stored RMSD manifests
 without modifying the original CSVs.
 
 Example:
 
 ```bash
-python refilter_distances_at_custom_rmsd.py \
-  --distances-root cav12/dataDistances \
-  --rmsd-root cav12/rmsd_convergence_filtering \
-  --output-root rmsd_threshold_sensitivity \
+python scripts/filtering/refilter_distances_at_custom_rmsd.py \
+  --distances-root kv21/dataDistances \
+  --rmsd-root kv21/rmsd_convergence_filtering \
+  --output-root kv21/rmsd_threshold_sensitivity \
   --threshold 3 \
-  --channel Cav12
+  --channel Kv21
 ```
 
 For Kv2.1, structural QC should be retained when making the primary comparison. Convergence alone does

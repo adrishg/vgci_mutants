@@ -1,0 +1,7 @@
+PDB	Species/state	Central_IFM	Receptor_1	Receptor_2	IFM1_CA_A	IFM2_CA_A	Central_N1659_shortest_A	Central_N1765_shortest_A	Whole_motif_N1659_shortest_A	Status
+8VYJ	Human full-length Class-I open	F1486	N1659	N1765	8.037	9.896	4.072	3.048	4.072	verified
+8VYK	Human full-length Class-II expanded open	F1486	N1659	N1765	7.782	10.316	3.522	3.193	3.522	verified
+7DTC	Human E1784K intermediate-inactivated	F1486	N1659	N1765	6.743	9.072	2.801	3.004	2.801	verified
+8T6L	Rat BTX-B open comparator	F1488	N1661	N1767	6.764	8.585	3.040	3.516	3.040	verified
+6UZ3	Rat Nav1.5 reference	F1488	N1661	N1767	7.028	9.304	2.901	3.871	2.901	verified
+7FBS	Rat Nav1.5c/QQQ engineered open	QQQ unresolved	N1661	N1767							not calculable: engineered III-IV-linker motif coordinates absent

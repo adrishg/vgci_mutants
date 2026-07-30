@@ -1,0 +1,101 @@
+project:
+  name: Kv2.1 ensemble RMSF
+  channel: Kv2.1
+  project_root: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1
+  output_root: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/ensemble_rmsf_results
+
+# Raw AlphaFold model numbering. All calculations retain this numbering.
+residue_axis:
+  start: 1
+  end: 600
+
+model_chains: [A, B, C, D]
+canonical_chains: [A, B, C, D]
+
+sequence_fastas:
+  wt: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/wt/kv21_wt.fasta
+  l403a: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/l403a/kv21_l403a.fasta
+  f412l: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/f412l/kv21_f412l.fasta
+
+datasets:
+  - name: wt_vanilla
+    sequence_condition: wt
+    protocol: vanilla
+    # Based on the current cluster layout. Change to wt/vanilla if inspection
+    # shows that directory, rather than wt/models, contains the intended set.
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/wt/vanilla
+  - name: wt_masked
+    sequence_condition: wt
+    protocol: masked
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/wt/masked
+  - name: l403a_vanilla
+    sequence_condition: l403a
+    protocol: vanilla
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/l403a/vanilla
+  - name: l403a_masked
+    sequence_condition: l403a
+    protocol: masked
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/l403a/masked
+  - name: f412l_vanilla
+    sequence_condition: f412l
+    protocol: vanilla
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/f412l/vanilla
+  - name: f412l_masked
+    sequence_condition: f412l
+    protocol: masked
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/f412l/masked
+
+references:
+  anchor_id: 8SD3
+  structures:
+    - id: 8SD3
+      state: wt_experimental
+      sequence_condition: wt
+      path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/experimental/8SD3.pdb
+      chains: [A, B, C, D]
+    - id: 8SDA
+      state: l403a_experimental
+      sequence_condition: l403a
+      path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Kv2.1/experimental/8SDA.pdb
+      chains: [A, B, C, D]
+
+# Conservative unmasked alignment anchor. The principal fit uses all four
+# subunits simultaneously and one rigid transformation for the full tetramer.
+# These raw ranges correspond to stable S1-S3 transmembrane segments and avoid
+# all three directly masked blocks, the pore, S6, and unresolved experimental loops.
+alignment_core:
+  name: unmasked_S1_S3_core
+  raw_ranges:
+    - [184, 208]
+    - [231, 247]
+    - [262, 277]
+  minimum_matched_ca: 160
+  minimum_coverage: 0.75
+
+masking:
+  adjacent_sequence_window: 5
+  blocks:
+    - name: mask_block_1
+      raw_start: 288
+      raw_end: 328
+    - name: mask_block_2
+      raw_start: 370
+      raw_end: 384
+    - name: mask_block_3
+      raw_start: 401
+      raw_end: 417
+
+sequence_alignment:
+  match_score: 2.0
+  mismatch_score: -1.0
+  open_gap_score: -10.0
+  extend_gap_score: -0.5
+  end_gap_score: 0.0
+
+analysis:
+  recursive: true
+  minimum_residue_coverage: 0.80
+  coordinate_dtype: float32
+  default_array_tasks: 100
+  bootstrap_replicates: 0
+  bootstrap_seed: 20260728

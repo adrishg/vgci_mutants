@@ -1,0 +1,20 @@
+{
+  "channel": "kv21",
+  "selection": "all_ok_3_structural_interface_qc",
+  "aligned_models": 35994,
+  "selected_models": 25191,
+  "output": "kv21/dataRMSF/profiles/kv21_all_ok_3_symmetry_averaged_profiles.csv",
+  "validation": {
+    "dataset": "f412l_masked",
+    "max_abs_delta_A": 4.700684286262913e-12,
+    "median_abs_delta_A": 5.426770144367765e-13
+  },
+  "selected_by_dataset": {
+    "f412l_masked": 3841,
+    "f412l_vanilla": 4521,
+    "l403a_masked": 3910,
+    "l403a_vanilla": 4403,
+    "wt_masked": 3925,
+    "wt_vanilla": 4591
+  }
+}

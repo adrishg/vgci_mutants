@@ -1,0 +1,63 @@
+numbering: 1-based raw query/model residue numbering
+authority: A3M extraction; ranges below are validation checkpoints only
+
+channels:
+  kv21:
+    raw_length: 600
+    datasets:
+      wt_masked:
+        a3m_patterns: ["Kv2.1/wt/masked/kv21_wt_mask_test.repaired.a3m"]
+        expected_count: 73
+        required_ranges: "288-328, 370-384, 401-417"
+      l403a_masked:
+        a3m_patterns: ["Kv2.1/l403a/masked/kv21_l403a_masked.a3m"]
+        expected_count: 73
+        required_ranges: "288-328, 370-384, 401-417"
+      f412l_masked:
+        a3m_patterns: ["Kv2.1/f412l/masked/kv21_f412l_masked.a3m"]
+        expected_count: 73
+        required_ranges: "288-328, 370-384, 401-417"
+
+  nav15:
+    raw_length: 1572
+    datasets:
+      wt_masked:
+        a3m_patterns: ["Nav1.5/wt/masked/nav15_wt_6uz0_masked.a3m"]
+        expected_count: 293
+      wt_masked_v2:
+        a3m_patterns: ["Nav1.5/wt/masked_v2/nav15_wt_7fbs_masked.a3m"]
+        expected_count: 193
+        required_ranges: "1164-1176"
+      wt_masked_v2_noIFM:
+        a3m_patterns: ["Nav1.5/wt/masked_v2_noIFM/*.a3m"]
+        expected_count: 180
+        forbidden_ranges: "1164-1176"
+      qqq_masked:
+        a3m_patterns: ["Nav1.5/qqq/masked/nav15_qqq_7fbs_masked.a3m"]
+        expected_count: 306
+        required_ranges: "1164-1176"
+      qqq_masked_v2:
+        a3m_patterns: ["Nav1.5/qqq/masked_v2/nav15_qqq_7fbs_masked.a3m"]
+        expected_count: 193
+        required_ranges: "1164-1176"
+
+  cav12:
+    raw_length: 1685
+    datasets:
+      wt_masked:
+        a3m_patterns: ["Cav1.2/wt/masked/*.a3m"]
+        expected_count: 263
+      g402s_masked:
+        a3m_patterns: ["Cav1.2/g402s/masked/*.a3m"]
+        expected_count: 272
+        mutation_position: 402
+      g406r_masked:
+        a3m_patterns: ["Cav1.2/g406r/masked/*.a3m"]
+        expected_count: 268
+        mutation_position: 406
+      g490r_masked:
+        a3m_patterns: ["Cav1.2/g490r/masked/*.a3m"]
+        expected_count: 274
+        required_ranges: "485-495"
+        mutation_position: 490
+        expected_local_sequence_485_495: EGENCGARLAH

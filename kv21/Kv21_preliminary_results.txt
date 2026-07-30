@@ -15,6 +15,29 @@ does not reproduce the contracted median S6 profile observed in 8SDA. Masking th
 access to alternative geometries, but broader sampling and recovery of a mutation-specific experimental
 state remain separate outcomes.
 
+Asymmetric chain-C pore–VSD shift
+
+A focused analysis of the chain-C S6-side pore–VSD interface reveals a directional response that is
+obscured in the complete 24-distance panel. For E423-N179, the L403A median increases from 10.17 Å in
+vanilla to 11.07 Å under masking, toward the 14.17 Å distance in experimental L403A structure 8SDA.
+Vanilla therefore remains near the lower-distance geometry and does not capture the experimental
+chain-C displacement, whereas masking samples in the correct direction.
+
+The response is not limited to this single pair. All six chain-C coordinates connecting K427, E423,
+or K420 to N179 or V182 move toward their corresponding 8SDA values under masking. The masked-minus-
+vanilla shifts range from +0.53 to +1.75 Å: K427-N179 changes by +1.06 Å, K427-V182 by +1.75 Å,
+E423-N179 by +0.90 Å, E423-V182 by +1.02 Å, K420-N179 by +0.53 Å, and K420-V182 by +0.60 Å.
+These shifts recover only part of the experimental displacement, so the result supports enhanced
+sampling toward an L403A-like asymmetric interface rather than full reproduction of 8SDA.
+
+The experimental displacement is chain dependent: it is small in chains A and B, larger in chain C,
+and largest in chain D. The predictions remain much more symmetric across A-D, even after masking.
+Pooling chains into one distribution would therefore dilute the biologically relevant asymmetry and
+treat correlated subunits from the same model as independent samples. The paper-facing figure should
+retain chain C as the focused six-coordinate panel and show E423-N179 across all four chains as a
+compact context panel. This displays the strongest reproducible direction while making its subunit
+specificity and incomplete experimental recovery transparent.
+
 Gate openness and coordinated state sampling
 
 L403A is biased toward a slightly larger intracellular-gate span than protocol-matched WT in both
@@ -53,3 +76,173 @@ Only chain A is used for this cross-protocol test because the WT vanilla CSV doe
 corresponding four-chain VSD block. The conclusion is therefore limited to the two shared F236-R289
 and F236-R308 landmarks and should not be generalized to all four voltage sensors without additional
 matched measurements.
+
+Mutation-side-chain contact analysis
+
+L403A does not form a recurrent new mutation-side-chain contact in the current structurally filtered
+ensemble. No tested alanine-partner pair exceeds a 4.3% contact fraction, and most are below 1%.
+Several contacts made by WT L403 are instead lost after substitution by the smaller alanine side
+chain. The clearest example is the paper-numbered L403A-L316B pair in vanilla predictions: the WT
+contact fraction is 76.9%, whereas the L403A ensemble has no models at or below 4 Å. Under masking,
+the corresponding WT L403 contacts to L316B and L316D are also common, but fall to 0.6% and 1.1% in
+L403A. The local effect is therefore better described as removal and loosening of hydrophobic packing
+than formation of a new stabilizing interaction.
+
+F412L produces more extensive S6-neighborhood repacking. The paper-numbered L412-L403D contact occurs
+in 42.4% of vanilla F412L models, and L412-I407D occurs in 17.6%. Under masking, L412-L403B and
+L412-I407B contacts occur in 35.4% and 13.4% of models, respectively; their median distances are
+8.8 Å and 7.6 Å shorter than the protocol-matched WT Phe distances. The preferred chain partner
+therefore changes between protocols, consistent with the broader and weakly coordinated masked F412L
+ensemble rather than a single rigid rearrangement. A small fraction of masked L412-L403B models
+(2.8%) has distances below 2 Å, so this contact population requires steric inspection before being
+assigned mechanistic significance.
+
+The contact analysis reinforces the distinction between the mutants. L403A primarily removes local
+side-chain packing while retaining a modest coordinated gate-S6 displacement. F412L creates several
+alternative close-packing arrangements and shows the stronger contracted gate/S6 bias, but masking
+distributes that response across alternative partners and introduces a minor overlap population.
+Neither result by itself demonstrates recovery of the experimental 8SDA state.
+
+Hydrophobic coupling nexus as a targeted structural benchmark
+
+The F412-centered hydrophobic nexus provides a compact mechanistic test of model quality. The current
+analysis uses three shortest heavy-atom coordinates: F412 to L316 in the same subunit, and the minimum
+F412-to-L329 and F412-to-L403 distances across neighboring subunits. For F412L predictions, the
+corresponding L412 distances are used. This three-coordinate representation is compared with 8SD3 as
+the mutation-matched WT reference. Because no mutation-matched F412L experimental structure is
+included, 8SDA is used only to test sampling of an L403A-like nexus state, not absolute F412L accuracy.
+
+In 8SD3, the three shortest nexus distances are 3.89 Å for F412-L316, 3.82 Å for F412-L329, and
+3.77 Å for F412-L403. Relative to this vector, masking improves the WT ensemble: the median
+three-coordinate root-mean-square distance to 8SD3 decreases from 1.57 Å in vanilla to 1.37 Å when
+masked. The fraction of WT models within 1.5 Å of the experimental nexus increases from 32.0% to
+76.5%. Thus, targeted masking improves local WT nexus agreement even though it broadens other channel
+coordinates.
+
+The F412L result is different. Relative to the 8SDA state-reference vector, the median nexus error is
+1.43 Å in vanilla and 1.51 Å when masked, and the fraction within 1.5 Å decreases from 66.0% to 49.1%.
+Masking therefore does not move the center of the F412L ensemble closer to 8SDA. It does, however,
+create a closer tail: 3.3% of masked models fall within 1.0 Å of the 8SDA nexus, compared with 0.04%
+of vanilla models. This supports the narrower claim that masking samples an additional
+experiment-like nexus subpopulation, not that the complete masked F412L ensemble is more accurate.
+
+The apparent gain requires steric qualification. Approximately 3.5% of masked F412L models contain a
+sub-2 Å L412-L403 shortest distance, whereas the corresponding vanilla nexus has no such overlap.
+Nexus fidelity should therefore be reported both before and after removing or relaxing clashing
+models. A convincing masking benefit would require enrichment of the low-error population after this
+steric filter and coordination of the nexus score with the experimentally directed S6/gate shift.
+
+Exploratory F412L-specific nexus states
+
+The absence of a solved F412L structure makes the internal organization of its predicted ensemble
+particularly informative. F412L does not simply weaken all three nexus contacts. Instead, it
+redistributes packing among them. In vanilla, the median L412-L316, L412-L329, and L412-L403 shortest
+distances are 5.0, 6.3, and 4.0 Å, respectively. Relative to the 8SD3 WT nexus, F412L therefore loses
+the close L329 interaction while forming a tighter and much more frequent L412-L403 contact. This
+contact redistribution offers a structural explanation for how replacing the aromatic F412 side
+chain with leucine could alter coupling without globally unfolding the S6 region.
+
+The vanilla ensemble is dominated by one neighboring-subunit orientation. The closest L329 and L403
+partners are both in chain D for 78.8% of models and both in chain B for 19.3%; chain C is selected in
+only 1.9%. Masking changes this balance rather than producing a uniform expansion. Both contacts are
+chain-B-centered in 52.0% of models and chain-D-centered in 41.5%. The two partner identities agree
+in 94.3% of masked models and 100% of vanilla models. This concordance indicates that these are
+alternative orientations of the coupled nexus, rather than independent fluctuations of individual
+side chains. Because Kv2.1 is homotetrameric, chain-B versus chain-D occupancy may also represent
+symmetry-related clockwise and counterclockwise solutions. Structural alignment with a fixed chain-A
+reference is required before treating them as functionally distinct substates.
+
+Masking also makes these orientations structurally more heterogeneous. The L412-L329 interquartile
+range expands from 6.1-6.7 Å in vanilla to 6.2-9.3 Å when masked, while the L412-L403 lower tail
+extends to 2.2 Å at the tenth percentile. The latter includes the 3.5% steric-overlap population, but
+the experiment-like tail is not eliminated by removing those models: after excluding every nexus
+distance below 2 Å, 3.4% of masked F412L models remain within 1.0 Å of the 8SDA three-contact nexus,
+compared with 0.04% of vanilla models. Masking therefore reveals a genuine low-error subpopulation
+alongside a separate overpacked population that requires relaxation.
+
+The nexus alternatives are coupled to broader S6 geometry. In masked F412L, the L412-L403 distance
+correlates negatively with intracellular-gate span (Spearman rho = -0.61) and positively with the
+distal-S6 V409 span (rho = +0.73). The ten percent of masked models closest to the 8SDA nexus have a
+median gate span of 12.91 Å and V409 span of 16.30 Å, compared with 13.45 and 16.53 Å for the complete
+masked ensemble. The corresponding vanilla low-error subset is only slightly contracted. Thus, the
+masked experiment-like nexus population is associated with a modestly more contracted pore/S6
+geometry rather than being an isolated side-chain rearrangement.
+
+These results support a testable structural hypothesis for the unresolved mutant. F412L may populate
+at least two neighboring-subunit coupling orientations, with masking increasing exchange between
+chain-B- and chain-D-centered packing. A minority substate combines an 8SDA-like loosened L329
+contact, reconfigured L403 packing, and a contracted intracellular S6 geometry. This should be
+presented as an F412L-specific predicted substate—not as a reconstructed experimental structure—and
+prioritized for side-chain relaxation, clustering, and comparison with the mutation's functional
+inactivation phenotype.
+
+Corrected experimental-reference RMSD analysis
+
+The corrected v2 RMSD calculation resolves the earlier approximately 31 Å artifact. The analysis
+uses only structures in the allOK3 convergence manifest, excludes rows flagged by the v2 chain-mapping
+QC, applies the same tetramer/interface allowlists used by the distance notebooks, and removes complete
+trajectories in the separated alignment-failure population. The latter begins at a stable-core RMSD of
+5.77 Å, after an empty 4.0–5.7 Å interval, and simultaneously shows 10.9–16 Å S6-bundle RMSD. A
+conservative 4 Å stable-core cutoff is therefore used as a topology/alignment failure threshold rather
+than as a trimming rule for the continuous conformational distribution. This retains 24,269 unique
+model snapshots: 4,562 WT vanilla, 3,658 WT masked, 4,371 L403A vanilla, 3,693 L403A masked, 4,407
+F412L vanilla, and 3,578 F412L masked. The mapping-QC filter removes 1,245 allOK3 models, and the
+subsequent structural filter removes 388 additional models.
+
+Paired reference resemblance was calculated as RMSD(8SDA)-RMSD(8SD3), where negative values indicate
+greater resemblance to the experimental L403A structure and positive values indicate greater
+resemblance to WT 8SD3. At the whole-tetramer level, F412L provides the clearest mutant-specific
+result. The median paired score is -0.297 Å in vanilla and -0.215 Å under masking; 90.2% and 85.1% of
+the corresponding models, respectively, are closer to 8SDA than to 8SD3. Thus, F412L has a robust
+global bias toward the L403A-like experimental arrangement even though no F412L structure was
+available for fitting or validation.
+
+The F412L resemblance is not a uniform copy of 8SDA. In the four-chain S6 bundle, the fraction closer
+to 8SDA is 33.9% in vanilla and 48.2% under masking. In distal S6 it is 1.9% and 31.6%, and in the
+hydrophobic coupling nexus it is 3.0% and 31.4%. Masking therefore shifts substantial F412L
+subpopulations toward the L403A experimental geometry in the mechanistically relevant S6 and nexus
+regions, while the medians remain on or near the WT side of the reference boundary. The most
+defensible interpretation is that F412L favors a globally L403A-related state and that masking
+increases access to locally L403A-like S6/nexus substates; it does not reproduce every local feature
+of 8SDA.
+
+WT and L403A remain predominantly closer to 8SD3 in the localized S6 and nexus RMSDs. Masking broadens
+both ensembles and increases their 8SDA-like tails. For example, the masked fraction closer to 8SDA
+in the four-chain S6 bundle is 20.6% for WT and 13.5% for L403A, compared with 1.6% and 2.1% in
+vanilla. The apparently weak L403A reference preference is not necessarily inconsistent with the
+experimentally directed E423-N179 distance shift. RMSD averages many atomic displacements and can
+dilute a small, directional, chain-specific movement. The chain-specific distance panel and the
+regional RMSD distributions should therefore be presented together.
+
+Across all sequences, masking raises median absolute RMSD to each individual reference, consistent
+with broader sampling rather than uniformly improved static accuracy. The relevant benefit is
+redistribution and access to alternative experimental-like subpopulations. This distinction is most
+important for the unresolved F412L mutant: vanilla already shows a strong whole-channel 8SDA bias,
+whereas masking preferentially increases the local S6 and nexus fractions that cross toward 8SDA.
+
+RMSF redistribution relative to the targeted masks
+
+These values were recomputed from the final allOK3 structural/interface-QC ensembles and supersede
+the legacy all-model RMSF profiles for quantitative interpretation. The analysis includes 25,191
+accepted model snapshots: 3,841 F412L masked, 4,521 F412L vanilla, 3,910 L403A masked, 4,403 L403A
+vanilla, 3,925 WT masked, and 4,591 WT vanilla. Kv2.1 is reported both by chain and as a
+symmetry-averaged tetramer profile.
+
+The filtered result sharpens the masking interpretation. Median masked-minus-vanilla RMSF within
+directly masked residues is +1.47 Å for WT, +1.31 Å for L403A, and +1.31 Å for F412L. Outside the
+direct masks, however, the median changes are -0.24, -0.40, and -0.47 Å, respectively. The fractions
+of all residues with increased RMSF are only 54.8%, 54.5%, and 54.0%. Masking therefore does not
+produce a uniform global broadening. It strongly releases the targeted pore/VSD-coupling region while
+reducing median variability across much of the rest of the protein.
+
+The largest provisional segment-level increases lie in the S4-S5 linker, S5, pore helix/selectivity
+filter region, and S6. In WT, their median changes are approximately +5.03, +6.52, +4.85, and
++2.31 Å; L403A gives +4.47, +5.87, +4.32, and +1.91 Å; F412L gives +4.86, +6.52, +4.99, and
++1.30 Å. These boundaries are sequence-based annotations and should be checked before detailed
+residue-level claims, but the spatial concentration of the effect is robust.
+
+This result supports targeted conformational release rather than nonspecific destabilization. It also
+means that the paper should not describe masking as globally increasing Kv2.1 RMSF. The defensible
+claim is that masking redistributes sampling toward the targeted electromechanical-coupling and pore
+segments, while the distance and experimental-reference analyses determine whether the newly sampled
+substates are mechanistically or experimentally relevant.

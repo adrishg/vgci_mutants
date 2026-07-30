@@ -9,9 +9,56 @@ import pandas as pd
 
 VALID_SELECTIONS = (
     "all", "all_ok", "all_ok_3", "all_ok_3_structural_qc",
-    "all_ok_3_structural_interface_qc", "all_ok_3p5",
+    "all_ok_3_structural_interface_qc",
+    "all_ok_3_structural_interface_alignment_qc", "all_ok_3p5",
     "first_converged", "first_100_generated",
 )
+
+
+def select_manifest_rows(path: str | Path, subset: str) -> pd.DataFrame:
+    """Select recycle rows from an RMSD convergence manifest."""
+    frame = pd.read_csv(path)
+    if subset == "all":
+        return frame[frame["parse_ok"].fillna(False)].copy()
+    if subset == "all_ok":
+        return frame[frame["all_ok"].fillna(False)].copy()
+    if subset == "all_ok_3":
+        selected = []
+        work = frame[~frame["is_base"].fillna(False)].copy()
+        for _, trajectory in work.groupby(["seed", "model_number"], sort=False):
+            trajectory = trajectory.sort_values("recycle_number")
+            passed = (
+                pd.to_numeric(
+                    trajectory["rmsd_to_previous_available"], errors="coerce"
+                ).le(3.0)
+                & pd.to_numeric(
+                    trajectory["aligned_coverage_to_previous"], errors="coerce"
+                ).ge(0.9)
+            )
+            starts = [
+                index
+                for index in range(len(trajectory))
+                if bool(passed.iloc[index:].all())
+            ]
+            if starts:
+                selected.append(trajectory.iloc[starts[0]:])
+        return (
+            pd.concat(selected, ignore_index=True)
+            if selected
+            else work.iloc[0:0].copy()
+        )
+    if subset == "first_converged":
+        return frame[frame["earliest_converged_selected"].fillna(False)].copy()
+    if subset == "first_100_generated":
+        valid = frame[frame["all_ok"].fillna(False)].copy()
+        trajectories = (
+            valid[["seed", "model_number"]]
+            .drop_duplicates()
+            .sort_values(["seed", "model_number"])
+            .head(100)
+        )
+        return valid.merge(trajectories, on=["seed", "model_number"], how="inner")
+    raise ValueError(f"Unknown subset: {subset}")
 
 
 def distance_csv_options(
@@ -29,8 +76,18 @@ def distance_csv_options(
     # recalculated table. Dataset variants should still receive one clean suffix.
     while base.endswith("_all"):
         base = base[:-4]
-    filtered = root / "rmsd_filtered_distances" / channel / condition / protocol
-    threshold_3p5 = root / "rmsd_threshold_sensitivity" / channel / "3p5A" / condition / protocol
+    channel_dir = {
+        "cav12": "cav12",
+        "kv21": "kv21",
+        "nav15": "nav15",
+    }.get(str(channel).lower())
+    if channel_dir is None:
+        raise ValueError(f"Unknown channel directory for {channel!r}")
+    filtered = root / channel_dir / "rmsd_filtered_distances" / condition / protocol
+    threshold_3p5 = (
+        root / channel_dir / "rmsd_threshold_sensitivity"
+        / "3p5A" / condition / protocol
+    )
     return {
         "all": original,
         "all_ok": filtered / f"{base}_all_ok_5.csv",
@@ -40,6 +97,7 @@ def distance_csv_options(
         "all_ok_3": original.parent / f"{base}_all_ok_rmsd_3A.csv",
         "all_ok_3_structural_qc": original.parent / f"{base}_all_ok_rmsd_3A_structural_qc.csv",
         "all_ok_3_structural_interface_qc": original.parent / f"{base}_all_ok_rmsd_3A_structural_interface_qc.csv",
+        "all_ok_3_structural_interface_alignment_qc": original.parent / f"{base}_all_ok_rmsd_3A_structural_interface_alignment_qc.csv",
         "all_ok_3p5": threshold_3p5 / f"{base}_all_ok_rmsd_3p5A.csv",
         "first_converged": filtered / f"{base}_earliest_converged.csv",
         "first_100_generated": filtered / f"{base}_first_100_generated.csv",

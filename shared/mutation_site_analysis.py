@@ -12,6 +12,12 @@ import seaborn as sns
 import numpy as np
 from Bio.PDB import PDBParser
 
+from shared.plotting import (
+    experimental_reference_style,
+    format_channel_title,
+    format_distance_alias,
+)
+
 
 # Explicit distances calculated from the downloaded Cav1.2 α-subunits. Values are Å.
 CAV12_MUTANT_EXPERIMENTAL_DISTANCES = {
@@ -81,13 +87,7 @@ def top_aliases(
     selected = shift_table.head(n)["distance"].tolist()
     aliases = {}
     for column in selected:
-        label = column.replace("CA_CA_", "").replace("shortest_", "")
-        if residue_number_offset:
-            label = re.sub(
-                r"(?<=[A-Z]{3})(\d+)",
-                lambda match: str(int(match.group(1)) + residue_number_offset),
-                label,
-            )
+        label = format_distance_alias(column, residue_number_offset)
         aliases[label] = column
     return aliases
 
@@ -155,8 +155,10 @@ def plot_nearby_overlay(
         cut=0, linewidth=0.6, saturation=0.82, ax=ax,
     )
     if experimental_distances:
-        marker_colors = experimental_colors or {}
         for structure_index, (structure, distances) in enumerate(experimental_distances.items()):
+            style = experimental_reference_style(structure, structure_index)
+            if experimental_colors and structure in experimental_colors:
+                style["color"] = experimental_colors[structure]
             used_label = False
             offset = (structure_index - (len(experimental_distances) - 1) / 2) * 0.08
             for alias, values in distances.items():
@@ -165,14 +167,19 @@ def plot_nearby_overlay(
                 xpos = list(aliases).index(alias) + offset
                 for value in values:
                     ax.scatter(
-                        xpos, value, marker=("o", "s", "D", "^", "v", "P", "X", "*")[structure_index % 8],
+                        xpos, value, marker=style["marker"],
                         s=34, facecolors="white",
-                        edgecolors=marker_colors.get(structure, "#E57373"), linewidths=0.8,
+                        edgecolors=style["color"], linewidths=0.8,
                         zorder=6, label=f"Experimental | {structure}" if not used_label else None,
                     )
                     used_label = True
     experimental_suffix = " | experimental distances" if experimental_distances else ""
-    ax.set_title(f"{channel} | WT vs {mutant_label} | {protocol} | nearby mutation site{experimental_suffix}")
+    ax.set_title(
+        format_channel_title(
+            f"{channel} | WT vs {mutant_label} | {protocol} | "
+            f"nearby mutation site{experimental_suffix}"
+        )
+    )
     ax.tick_params(axis="x", rotation=55)
     ax.legend(title="Ensembles and experimental structures", bbox_to_anchor=(1.02, 1), loc="upper left")
     ax.grid(axis="y", color="#EDF5EF", linestyle="--", linewidth=0.4)

@@ -1,0 +1,21 @@
+{
+  "channel": "nav15",
+  "selection": "all_ok_3",
+  "aligned_models": 42000,
+  "selected_models": 34998,
+  "output": "nav15/dataRMSF/profiles/nav15_all_ok_3_per_residue_profiles.csv",
+  "validation": {
+    "dataset": "qqq_masked",
+    "max_abs_delta_A": 6.738493096847264e-11,
+    "median_abs_delta_A": 6.2990168636645194e-12
+  },
+  "selected_by_dataset": {
+    "qqq_masked": 4999,
+    "qqq_masked_v2": 5000,
+    "qqq_vanilla": 5000,
+    "wt_masked": 5000,
+    "wt_masked_v2": 4999,
+    "wt_masked_v2_noIFM": 5000,
+    "wt_vanilla": 5000
+  }
+}

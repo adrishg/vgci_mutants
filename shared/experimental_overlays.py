@@ -11,6 +11,7 @@ import ast
 import json
 from pathlib import Path
 
+from shared.plotting import experimental_reference_style
 
 EXPERIMENTAL_COLORS = (
     "#E57373", "#F48FB1", "#F06292", "#FF8A65", "#FFB74D",
@@ -61,13 +62,14 @@ def _rows(distances, labels):
     rows = []
     for index, (distance_map, label) in enumerate(zip(distances, labels)):
         structure = label.replace("Experimental | ", "")
+        style = experimental_reference_style(structure, index)
         for alias, values in distance_map.items():
             for value in values:
                 rows.append({
                     "Alias": alias,
                     "Distance": float(value),
                     "Structure": structure,
-                    "Color": EXPERIMENTAL_COLORS[index % len(EXPERIMENTAL_COLORS)],
+                    "Color": style["color"],
                 })
     return rows
 
@@ -187,3 +189,19 @@ def experimental_rows(repo_root: str | Path, channel: str, region: str, aliases)
     if channel == "Nav1.5":
         return _nav15(root, region, alias_set)
     return []
+
+
+def nav15_state_experimentals(
+    region,
+    *,
+    experimental_states,
+    colors,
+    pdb_ids=("8VYJ", "8VYK"),
+):
+    """Return Nav1.5 state-reference maps, labels, and colors for one region."""
+    distances = [experimental_states[pdb_id][region] for pdb_id in pdb_ids]
+    labels = [
+        f"Experimental | {pdb_id}: {experimental_states[pdb_id]['state']}"
+        for pdb_id in pdb_ids
+    ]
+    return distances, labels, list(colors)

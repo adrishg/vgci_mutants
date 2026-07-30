@@ -1,0 +1,135 @@
+project:
+  name: Nav1.5 ensemble RMSF
+  channel: Nav1.5
+  project_root: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5
+  output_root: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/ensemble_rmsf_results
+
+# Raw numbering used by the AlphaFold constructs. The uploaded example model
+# contains one chain A with residues 1-1572.
+residue_axis:
+  start: 1
+  end: 1572
+
+model_chain: A
+
+sequence_fastas:
+  wt: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/wt/nav15_wt_6uz0.fasta
+  qqq: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/qqq/nav15_qqq_7fbs.fasta
+
+# Structure discovery is recursive, so datasets work whether PDBs are directly
+# inside the folder or inside a models/ subdirectory.
+datasets:
+  - name: wt_vanilla
+    sequence_condition: wt
+    protocol: vanilla
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/wt/vanilla
+  - name: wt_masked
+    sequence_condition: wt
+    protocol: masked
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/wt/masked
+  - name: wt_masked_v2
+    sequence_condition: wt
+    protocol: masked_v2
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/wt/masked_v2
+  - name: wt_masked_v2_noIFM
+    sequence_condition: wt
+    protocol: masked_v2_noIFM
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/wt/masked_v2_noIFM
+  - name: qqq_vanilla
+    sequence_condition: qqq
+    protocol: vanilla
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/qqq/vanilla
+  - name: qqq_masked
+    sequence_condition: qqq
+    protocol: masked
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/qqq/masked
+  - name: qqq_masked_v2
+    sequence_condition: qqq
+    protocol: masked_v2
+    path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/qqq/masked_v2
+
+references:
+  # All models and references are placed in one 6UZ3 coordinate frame. Every
+  # profile is then evaluated against every reference without local re-fitting.
+  anchor_id: 6UZ3
+  structures:
+    - id: 6UZ3
+      state: rat_wt_reference
+      relationship: primary_WT_reference
+      species: rat
+      sequence_condition: wt
+      path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/experimental/6UZ3.pdb
+      chain: A
+    - id: 7FBS
+      state: rat_IFM_to_QQQ_reference
+      relationship: primary_QQQ_reference
+      species: rat
+      sequence_condition: qqq
+      path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/experimental/7FBS.pdb
+      chain: A
+    - id: 8T6L
+      state: rat_BTX_B_bound_reference
+      relationship: secondary_WT_state_reference
+      species: rat
+      sequence_condition: wt
+      path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/experimental/8T6L.pdb
+      chain: A
+    - id: 7DTC
+      state: human_E1784K_reference
+      relationship: cross_species_mutant_reference
+      species: human
+      sequence_condition: wt
+      path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/experimental/7DTC.pdb
+      chain: A
+    - id: 8VYJ
+      state: human_full_length_class_I
+      relationship: cross_species_WT_reference
+      species: human
+      sequence_condition: wt
+      path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/experimental/8VYJ.pdb
+      chain: A
+    - id: 8VYK
+      state: human_full_length_class_II
+      relationship: cross_species_WT_reference
+      species: human
+      sequence_condition: wt
+      path: /quobyte/yarovoygrp/ahgz/vgic_mutants/Nav1.5/experimental/8VYK.pdb
+      chain: A
+
+# Same stable-core selection previously used for Nav1.5 recycle-convergence QC.
+# One rigid transformation is applied to the complete model. Mobile linkers and
+# the IFM segment are excluded from the fit but remain in the RMSF output.
+alignment_core:
+  name: established_stable_core
+  raw_ranges:
+    - [132, 282]
+    - [359, 426]
+    - [505, 665]
+    - [690, 749]
+    - [870, 1112]
+    - [1128, 1164]
+    - [1200, 1405]
+    - [1429, 1466]
+  minimum_matched_ca: 700
+  minimum_coverage: 0.75
+
+# Mask ranges are deliberately deferred. The expensive alignment and full raw
+# profiles do not require them; exact mask annotations can be merged locally.
+annotations:
+  raw_regions:
+    - name: IFM_motif
+      raw_start: 1169
+      raw_end: 1171
+
+sequence_alignment:
+  match_score: 2.0
+  mismatch_score: -1.0
+  open_gap_score: -10.0
+  extend_gap_score: -0.5
+  end_gap_score: 0.0
+
+analysis:
+  recursive: true
+  minimum_residue_coverage: 0.80
+  coordinate_dtype: float32
+  default_array_tasks: 100

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kv21-ensemble-rmsf"
+version = "1.0.0"
+description = "Tetramer-aware ensemble RMSF and experimental-reference analysis for Kv2.1 AlphaFold2 ensembles"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "pandas>=2.0",
+  "biopython>=1.81",
+  "PyYAML>=6.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -9,6 +9,13 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+from shared.plotting import (
+    CAV12_PALETTE,
+    KV21_PALETTE,
+    NAV15_PALETTE,
+    format_channel_title,
+)
+
 
 def _numeric_block(frame: pd.DataFrame, columns: Sequence[str]) -> pd.DataFrame:
     available = [column for column in columns if column in frame.columns]
@@ -135,7 +142,10 @@ def plot_gate_state_comparison(
     for ax in axes:
         ax.grid(axis="y", color="#E9ECEF", linewidth=0.45, linestyle="--")
         sns.despine(ax=ax)
-    fig.suptitle(f"{channel} | WT vs {mutant_label} | {protocol}", fontweight="bold")
+    fig.suptitle(
+        format_channel_title(f"{channel} | WT vs {mutant_label} | {protocol}"),
+        fontweight="bold",
+    )
     fig.tight_layout()
 
     summary = pd.DataFrame(
@@ -210,44 +220,115 @@ def plot_vsd_bias(
     mutant_label: str,
     colors: Mapping[str, str],
 ):
-    """Plot VSD median shifts; negative values indicate a closer mutant contact."""
+    """Show full WT/mutant VSD distributions and annotate median shifts."""
     table = vsd_bias_table(comparisons, aliases)
-    fig, ax = plt.subplots(figsize=(10.5, 5.8))
     order = list(dict.fromkeys(table["VSD landmark"]))
-    positions = {alias: index for index, alias in enumerate(order)}
     protocols = list(comparisons)
-    offsets = np.linspace(-0.12, 0.12, len(protocols))
-    markers = ("o", "s", "D")
+    if not protocols or not order:
+        raise ValueError("No shared voltage-sensor distances are available")
+
+    channel_key = str(channel).lower().replace(".", "")
+
+    def wt_color(protocol: str) -> str:
+        low = str(protocol).lower()
+        if channel_key.startswith("kv"):
+            return KV21_PALETTE["WT_VAN" if "vanilla" in low else "WT_HM"]
+        if channel_key.startswith("cav"):
+            return CAV12_PALETTE["WT_VAN" if "vanilla" in low else "WT_HM"]
+        if "no" in low and "ifm" in low:
+            return NAV15_PALETTE["WT_MASKED_V2_NOIFM"]
+        if "v2" in low:
+            return NAV15_PALETTE["WT_MASKED_V2"]
+        return NAV15_PALETTE["WT_VAN" if "vanilla" in low else "WT_HM"]
+
+    records = []
+    for protocol, (wt, mutant) in comparisons.items():
+        for landmark, column in aliases.items():
+            if column not in wt or column not in mutant:
+                continue
+            for ensemble, frame in (("WT", wt), (mutant_label, mutant)):
+                records.extend(
+                    {
+                        "Protocol": protocol,
+                        "VSD landmark": landmark,
+                        "Ensemble": ensemble,
+                        "Cα distance (Å)": value,
+                    }
+                    for value in pd.to_numeric(
+                        frame[column], errors="coerce"
+                    ).dropna()
+                )
+    plot_frame = pd.DataFrame(records)
+    fig, axes = plt.subplots(
+        1, len(protocols),
+        figsize=(5.4 * len(protocols), 5.8),
+        sharey=True,
+        squeeze=False,
+    )
+    axes = axes[0]
     for index, protocol in enumerate(protocols):
-        part = table[table["Protocol"].eq(protocol)]
-        x = [positions[alias] + offsets[index] for alias in part["VSD landmark"]]
-        ax.scatter(
-            x,
-            part["Mutant − WT (Å)"],
-            s=34,
-            marker=markers[index % len(markers)],
-            facecolor="white",
-            edgecolor=colors[protocol],
-            linewidth=1.1,
-            label=protocol,
-            zorder=4,
+        ax = axes[index]
+        part = plot_frame[plot_frame["Protocol"].eq(protocol)]
+        palette = {"WT": wt_color(protocol), mutant_label: colors[protocol]}
+        sns.violinplot(
+            data=part,
+            x="VSD landmark",
+            y="Cα distance (Å)",
+            hue="Ensemble",
+            order=order,
+            hue_order=["WT", mutant_label],
+            split=True,
+            inner="quartile",
+            cut=0,
+            linewidth=0.7,
+            palette=palette,
+            ax=ax,
         )
-    ax.axhline(0, color="#646464", linewidth=0.8)
-    ax.fill_between(
-        [-0.5, len(order) - 0.5], -0.05, 0,
-        color="#EEE7F4", alpha=0.45, zorder=0,
+        ax.set_title(protocol)
+        ax.set_xlabel("Voltage-sensor landmark")
+        ax.tick_params(axis="x", rotation=35)
+        for tick in ax.get_xticklabels():
+            tick.set_horizontalalignment("right")
+        shifts = table[table["Protocol"].eq(protocol)].set_index("VSD landmark")
+        upper = part["Cα distance (Å)"].quantile(0.995)
+        lower = part["Cα distance (Å)"].quantile(0.005)
+        padding = max((upper - lower) * 0.12, 0.15)
+        ax.set_ylim(lower - padding * 0.25, upper + padding)
+        for position, landmark in enumerate(order):
+            if landmark not in shifts.index:
+                continue
+            delta = float(shifts.at[landmark, "Mutant − WT (Å)"])
+            ax.text(
+                position,
+                upper + padding * 0.28,
+                f"Δ={delta:+.2f} Å",
+                ha="center",
+                va="bottom",
+                fontsize=8.5,
+                color="#4E4A50",
+            )
+        if index:
+            ax.set_ylabel("")
+            if ax.get_legend() is not None:
+                ax.get_legend().remove()
+        else:
+            ax.set_ylabel("Cα distance (Å)")
+            ax.legend(title="Ensemble", frameon=True)
+        ax.grid(axis="y", color="#E9ECEF", linewidth=0.45, linestyle="--")
+        ax.grid(axis="x", visible=False)
+        sns.despine(ax=ax)
+    fig.suptitle(
+        format_channel_title(
+            f"{channel} | WT vs {mutant_label} | voltage-sensor distributions"
+        ),
+        fontweight="bold",
     )
-    ax.set_xticks(range(len(order)), order, rotation=45, ha="right")
-    ax.set_xlim(-0.5, len(order) - 0.5)
-    ax.set_ylabel("Mutant − WT median Cα distance (Å)")
-    ax.set_xlabel("Voltage-sensor landmark")
-    ax.set_title(f"{channel} | WT vs {mutant_label} | voltage-sensor bias")
-    ax.text(
-        0.01, 0.02, "Negative = closer in mutant",
-        transform=ax.transAxes, fontsize=9, color="#665A70",
+    fig.text(
+        0.5, 0.01,
+        "Δ denotes the mutant − WT median distance within each protocol.",
+        ha="center",
+        fontsize=9,
+        color="#665A70",
     )
-    ax.legend(title="Prediction protocol", frameon=True)
-    ax.grid(axis="y", color="#E9ECEF", linewidth=0.45, linestyle="--")
-    sns.despine(ax=ax)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0.04, 1, 0.94))
     return table, fig
