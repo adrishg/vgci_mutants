@@ -132,6 +132,13 @@ def plot_sampling_depth_condition(
     visible = {column: alias for alias, column in aliases.items()}
     order = [visible[column] for column in columns]
     references = experimental_rows(repo_root, channel, region, order)
+    # The 9O10–9O13 series is used here as a WT state ladder. Keeping those
+    # markers off the mutant panels avoids implying mutation-matched validation.
+    if channel == "Kv2.1" and condition != "WT":
+        references = [
+            row for row in references
+            if not row["Structure"].startswith(("9O10:", "9O11:", "9O12:", "9O13:"))
+        ]
 
     figure, axes = plt.subplots(
         2, 1, figsize=(12.8, 10.5), sharex=True,
