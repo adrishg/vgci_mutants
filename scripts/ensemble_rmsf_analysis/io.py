@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 import pandas as pd
 
 PROFILE_FILES = {
@@ -19,6 +20,38 @@ PROFILE_FILES = {
         "cav12_all_models_per_residue_profiles.csv",
     ),
 }
+
+
+def resolve_local_lfs_object(path: str | Path, repo_root: str | Path) -> Path:
+    """Return a local Git-LFS object when the working-tree file is a pointer.
+
+    Large RMSF tables remain lightweight pointers in the repository.  Notebook
+    analyses can still use already-downloaded objects without replacing those
+    pointers or requiring a network operation.
+    """
+    path = Path(path)
+    with path.open("rb") as handle:
+        prefix = handle.read(256).decode("utf-8", errors="ignore")
+    if not prefix.startswith("version https://git-lfs.github.com/spec/v1"):
+        return path
+    match = re.search(r"^oid sha256:([0-9a-f]{64})$", prefix, flags=re.MULTILINE)
+    if not match:
+        raise ValueError(f"Malformed Git-LFS pointer: {path}")
+    oid = match.group(1)
+    object_path = Path(repo_root) / ".git" / "lfs" / "objects" / oid[:2] / oid[2:4] / oid
+    if not object_path.is_file():
+        raise FileNotFoundError(
+            f"{path} is a Git-LFS pointer, but its local object is unavailable. "
+            "Run `git lfs pull` before executing the RMSF notebook."
+        )
+    return object_path
+
+
+def read_csv_resolving_lfs(
+    path: str | Path, repo_root: str | Path, **read_csv_kwargs
+) -> pd.DataFrame:
+    """Read a CSV whether its working-tree representation is data or an LFS pointer."""
+    return pd.read_csv(resolve_local_lfs_object(path, repo_root), **read_csv_kwargs)
 
 
 def discover_rmsf_inputs(repo_root: str | Path, channel: str) -> pd.DataFrame:
@@ -67,6 +100,7 @@ def load_primary_profile(repo_root: str | Path, channel: str) -> tuple[pd.DataFr
         raise FileNotFoundError(
             "Primary RMSF profile not found; checked: " + ", ".join(map(str, candidates))
         )
-    frame = pd.read_csv(path)
+    data_path = resolve_local_lfs_object(path, repo_root)
+    frame = pd.read_csv(data_path)
     schema = detect_profile_schema(frame, channel)
     return frame, schema, path

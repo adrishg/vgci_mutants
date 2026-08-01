@@ -18,7 +18,7 @@ import pandas as pd
 import seaborn as sns
 
 
-STYLE_VERSION = "channel-mathtext-v6-high-contrast-ensembles"
+STYLE_VERSION = "channel-mathtext-v7-cav12-amber-references"
 
 
 KV21_PALETTE = {
@@ -49,8 +49,10 @@ CAV12_PALETTE = {
 NAV15_PALETTE = {
     "WT_VAN": "#EBDCF2",
     "WT_HM": "#855094",
-    "QQQ_VAN": "#E6D0F2",
-    "QQQ_HM": "#7046A0",
+    # Keep both sequences in the lilac family, but make QQQ a visibly deeper
+    # warm lavender so WT-versus-QQQ overlays remain readable.
+    "QQQ_VAN": "#BFA4CC",
+    "QQQ_HM": "#4E2B62",
     # Reserved second mutant or alternative-mask family.
     "M2_VAN": "#EBC9E3",
     "M2_HM": "#8F3F75",
@@ -58,8 +60,8 @@ NAV15_PALETTE = {
     # saturation without changing the main WT-versus-mutant hue encoding.
     "WT_MASKED_V2": "#6F3F83",
     "WT_MASKED_V2_NOIFM": "#542D68",
-    "QQQ_MASKED": "#7046A0",
-    "QQQ_MASKED_V2": "#56327E",
+    "QQQ_MASKED": "#4E2B62",
+    "QQQ_MASKED_V2": "#3F214F",
 }
 
 ACCENT_PALETTE = {
@@ -95,8 +97,10 @@ RMSD_REFERENCE_STYLES = {
     "8WE9": {"color": ACCENT_PALETTE["ORANGE"], "marker": "v"},
     "8WE8": {"color": ACCENT_PALETTE["PEACH"], "marker": "P"},
     "8WE7": {"color": ACCENT_PALETTE["APRICOT"], "marker": "X"},
-    "8WE6": {"color": ACCENT_PALETTE["YELLOW"], "marker": "*"},
-    "8FD7": {"color": ACCENT_PALETTE["LEMON"], "marker": "<"},
+    # Use saturated amber/ochre rather than pale yellow so hollow markers
+    # remain visible on white figure backgrounds.
+    "8WE6": {"color": "#F28E2B", "marker": "*"},
+    "8FD7": {"color": "#B96B00", "marker": "<"},
     "8EOG": {"color": ACCENT_PALETTE["CREAM"], "marker": ">"},
 }
 

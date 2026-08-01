@@ -112,6 +112,36 @@ def read_residue_heavy_atoms(path: str | Path, chain: str = "A"):
     return residues
 
 
+def read_named_heavy_atoms(path: str | Path, chain: str = "A"):
+    """Return non-hydrogen coordinates keyed by residue identity and atom name."""
+    atoms = {}
+    with open(path, errors="ignore") as handle:
+        for line in handle:
+            if not line.startswith("ATOM") or line[21].strip() != chain:
+                continue
+            atom_name = line[12:16].strip()
+            element = line[76:78].strip() or atom_name[0]
+            if element.upper() == "H" or line[16] not in (" ", "A"):
+                continue
+            key = (
+                line[17:20].strip(),
+                int(line[22:26]),
+                atom_name,
+            )
+            atoms[key] = np.array(
+                [float(line[30:38]), float(line[38:46]), float(line[46:54])]
+            )
+    return atoms
+
+
+def named_atom_distance(atoms, key_a, key_b) -> float:
+    """Return the distance between two explicitly named residue atoms."""
+    first, second = atoms.get(key_a), atoms.get(key_b)
+    if first is None or second is None:
+        return np.nan
+    return float(np.linalg.norm(first - second))
+
+
 def minimum_residue_distance(residues, keys_a, key_b) -> float:
     """Return the minimum heavy-atom distance between residue set A and B."""
     atoms_a = [coordinate for key in keys_a for coordinate in residues.get(key, [])]

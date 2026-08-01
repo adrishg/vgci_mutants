@@ -59,7 +59,7 @@ NAV15_EXPERIMENTAL_STATES = {
     "7DTC": "E1784K intermediate-inactivated",
     "8VYJ": "full-length open, Model I",
     "8VYK": "full-length expanded open, Model II",
-    "8T6L": "BTX-B-bound comparator",
+    "8T6L": "toxin-bound",
 }
 
 

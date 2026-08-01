@@ -217,9 +217,22 @@ def cav12_experimental_shortest_distances(
                 atom for atom in partner_residue.get_atoms()
                 if str(atom.element).upper() != "H"
             ]
-            distance = min(
-                np.linalg.norm(atom_a.coord - atom_b.coord)
-                for atom_a in atoms_a for atom_b in atoms_b
+            atom_pairs = [
+                (
+                    float(np.linalg.norm(atom_a.coord - atom_b.coord)),
+                    atom_a,
+                    atom_b,
+                )
+                for atom_a in atoms_a
+                for atom_b in atoms_b
+            ]
+            distance, closest_site_atom, closest_partner_atom = min(
+                atom_pairs, key=lambda item: item[0]
+            )
+            ca_distance = float(
+                np.linalg.norm(
+                    site_residue["CA"].coord - partner_residue["CA"].coord
+                )
             )
             rows.append(
                 {
@@ -231,7 +244,11 @@ def cav12_experimental_shortest_distances(
                     "Site PDB residue": site_pdb_number,
                     "Partner": partner,
                     "Partner PDB residue": partner_pdb_number,
-                    "Shortest distance (Å)": float(distance),
+                    "Closest site atom": closest_site_atom.get_name(),
+                    "Closest partner atom": closest_partner_atom.get_name(),
+                    "Shortest distance (Å)": distance,
+                    "Cα distance (Å)": ca_distance,
+                    "Distance definition": "minimum non-hydrogen atom pair",
                 }
             )
     return pd.DataFrame(rows)
@@ -428,7 +445,7 @@ def plot_mutant_contact_distributions(
         lambda value: _display_residue(value, channel)
     )
     order = [_display_residue(value, channel) for value in partners]
-    fig, ax = plt.subplots(figsize=(10.5, 5.8))
+    fig, ax = plt.subplots(figsize=(10.5, 6.1))
     sns.violinplot(
         data=plot_df,
         x="Display partner",
@@ -443,9 +460,27 @@ def plot_mutant_contact_distributions(
         palette=colors,
         ax=ax,
     )
-    ax.axhspan(0, 2, color="#F4D6D7", alpha=.35, zorder=0)
-    ax.axhline(2, color="#C44E52", linewidth=.9, linestyle=":")
+    ax.set_ylabel("Shortest heavy-atom distance (Å)")
     ax.axhline(4, color="#7B6D86", linewidth=.8, linestyle="--")
+    # Preserve the compact 2–10 Å view when all sampled distances are
+    # physically plausible, but never hide a sub-2 Å population.  Those very
+    # short values may represent atomic overlap and are intentionally shown so
+    # they can be evaluated rather than silently clipped.
+    sampled_minimum = pd.to_numeric(
+        plot_df["Shortest distance (Å)"], errors="coerce"
+    ).min()
+    lower_limit = 0 if pd.notna(sampled_minimum) and sampled_minimum < 2 else 2
+    reference_maximum = np.nan
+    if experimental_distances is not None and not experimental_distances.empty:
+        reference_maximum = pd.to_numeric(
+            experimental_distances["Shortest distance (Å)"], errors="coerce"
+        ).max()
+    upper_limit = (
+        max(10, float(np.ceil(reference_maximum + 0.4)))
+        if pd.notna(reference_maximum)
+        else 10
+    )
+    ax.set_ylim(lower_limit, upper_limit)
     experimental_handles: list[Line2D] = []
     if experimental_distances is not None and not experimental_distances.empty:
         structure_order = [
@@ -486,7 +521,11 @@ def plot_mutant_contact_distributions(
         ),
         fontweight="bold",
     )
-    ax.set_xlabel(f"Partner of {_display_residue(mutant_residue, channel)}")
+    # Use the paper mutation notation here.  A label such as "S402" describes
+    # only the modeled post-mutation residue and can be mistaken for a
+    # different numbering system; "G402S site" preserves the experimental
+    # mutation identity while the tick labels retain publication numbering.
+    ax.set_xlabel(f"Interaction partner at the {mutant_label} site")
     ax.tick_params(axis="x", rotation=30)
     ax.grid(axis="y", color="#E9ECEF", linewidth=.45, linestyle="--")
     sns.despine(ax=ax)
@@ -497,20 +536,26 @@ def plot_mutant_contact_distributions(
         )
         for protocol in ("vanilla", "masked")
     ]
-    legend = ax.legend(
-        handles=protocol_handles + experimental_handles,
+    automatic_legend = ax.get_legend()
+    if automatic_legend is not None:
+        automatic_legend.remove()
+    boundary_handle = Line2D(
+        [0], [0],
+        color="#7B6D86",
+        linewidth=.8,
+        linestyle="--",
+        label="4 Å contact boundary",
+    )
+    legend = fig.legend(
+        handles=protocol_handles + experimental_handles + [boundary_handle],
         title="Prediction ensembles and WT references",
-        frameon=False, ncol=3,
-        loc="upper center", bbox_to_anchor=(0.5, 1.0),
+        frameon=False,
+        ncol=3,
+        loc="lower center",
+        bbox_to_anchor=(0.5, 0.01),
     )
     legend.set_zorder(10)
-    fig.text(
-        .5, .01,
-        "Dashed line: 4 Å contact boundary. Red region: probable atomic "
-        "overlap (<2 Å).",
-        ha="center", fontsize=9, color="#665A70",
-    )
-    fig.tight_layout(rect=(0, .04, 1, .95))
+    fig.tight_layout(rect=(0, .17, 1, .96))
     return plot_df, fig
 
 
@@ -551,7 +596,7 @@ def plot_mutation_contacts(
         ax=ax,
     )
     ax.set_ylabel("Fraction of models with shortest distance ≤4 Å")
-    ax.set_xlabel(f"Partner of {_display_residue(mutant_residue, channel)}")
+    ax.set_xlabel(f"Interaction partner at the {mutant_label} site")
     ax.set_title(
         format_channel_title(
             f"{channel} | {mutant_label} | mutation-side-chain contacts"
@@ -559,8 +604,21 @@ def plot_mutation_contacts(
     )
     ax.tick_params(axis="x", rotation=45)
     ax.grid(axis="y", color="#E9ECEF", linewidth=0.45, linestyle="--")
+    handles, labels = ax.get_legend_handles_labels()
+    legend = ax.get_legend()
+    if legend is not None:
+        legend.remove()
+    fig.legend(
+        handles=handles,
+        labels=labels,
+        title="Prediction protocol",
+        loc="lower center",
+        bbox_to_anchor=(.5, .015),
+        ncol=max(1, len(labels)),
+        frameon=False,
+    )
     sns.despine(ax=ax)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, .14, 1, 1))
     return table.sort_values(
         ["Mutant contact ≤4 Å", "Mutant median (Å)"], ascending=[False, True]
     ), fig
@@ -696,8 +754,13 @@ def plot_selected_contact_distributions(
             )
     fig.legend(
         handles=legend_handles,
-        title="Prediction ensembles and experimental structures",
-        loc="upper center", bbox_to_anchor=(.5, .925),
+        title=(
+            "Prediction ensembles and experimental structures"
+            if experimental_distances is not None
+            and not experimental_distances.empty
+            else "Prediction ensembles"
+        ),
+        loc="lower center", bbox_to_anchor=(.5, .065),
         ncol=min(4, len(legend_handles)), frameon=False,
     )
     wt_display = _display_residue_with_chain(wt_residue, channel)
@@ -710,5 +773,5 @@ def plot_selected_contact_distributions(
     if show_overlap_region:
         note += " Red region: probable atomic overlap (<2 Å)."
     fig.text(0.5, 0.01, note, ha="center", fontsize=9, color="#665A70")
-    fig.tight_layout(rect=(0, 0.04, 1, 0.84))
+    fig.tight_layout(rect=(0, .17, 1, .94))
     return plot_df, fig

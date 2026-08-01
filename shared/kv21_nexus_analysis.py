@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 import numpy as np
 import pandas as pd
@@ -188,7 +189,7 @@ def _nexus_distance_columns(columns) -> list[str]:
 
 
 def contact_signature(repo_root: str | Path) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Summarize nearest nexus contacts per allOK3 model.
+    """Summarize nearest nexus contacts in WT and F412L allOK3 models.
 
     Cross-chain labels cannot be compared directly between 8SD3, 8SDA and AF2
     models. We therefore use the closest available partner of each residue
@@ -198,40 +199,61 @@ def contact_signature(repo_root: str | Path) -> tuple[pd.DataFrame, pd.DataFrame
     root = Path(repo_root)
     allowed = _all_ok3_basenames(root)
     records = []
-    for protocol in ("vanilla", "masked"):
-        matches = sorted((root / "kv21/dataDistances").glob(
-            f"*f412l_{protocol}*structural_interface_alignment_qc.csv"
-        ))
-        if len(matches) != 1:
-            raise FileNotFoundError(
-                f"Expected one F412L {protocol} alignment-QC distance table; "
-                f"found {matches}"
+    for sequence_key, sequence_label in (("wt", "WT"), ("f412l", "F412L")):
+        for protocol in ("vanilla", "masked"):
+            source = (
+                root
+                / "kv21/dataDistances"
+                / (
+                    f"26-02-11_Kv2.1_{sequence_key}_{protocol}AF2_distances_"
+                    "all_ok_rmsd_3A_structural_interface_alignment_qc.csv"
+                )
             )
-        header = pd.read_csv(matches[0], nrows=0)
-        distance_columns = _nexus_distance_columns(header.columns)
-        frame = pd.read_csv(matches[0], usecols=["pdb_file", *distance_columns])
-        frame = frame.loc[_basename(frame["pdb_file"]).isin(allowed)]
-        frame["_model"] = _basename(frame["pdb_file"])
-        for partner_number, partner in {
-            318: "L316 (S4–S5 linker)",
-            331: "L329 (neighboring S5)",
-            405: "L403 (neighboring S6)",
-        }.items():
-            partner_columns = [
-                column for column in distance_columns
-                if re.search(fr"(?:^|[A-Z]){partner_number}[A-D](?:-|$)", column)
-            ]
-            values = frame[partner_columns].apply(pd.to_numeric, errors="coerce")
-            nearest = values.min(axis=1)
-            for model_name, distance in zip(frame["_model"], nearest):
-                records.append({
-                    "Protocol": protocol.capitalize(), "Contact": partner,
-                    "Model": model_name, "Nearest distance (Å)": distance,
-                    "number_of_available_pairs": len(partner_columns),
-                })
+            if not source.is_file():
+                raise FileNotFoundError(
+                    f"Missing {sequence_label} {protocol} alignment-QC "
+                    f"distance table: {source}"
+                )
+            header = pd.read_csv(source, nrows=0)
+            distance_columns = _nexus_distance_columns(header.columns)
+            if not distance_columns:
+                raise KeyError(
+                    f"No F412/L412-centered nexus distances found in {source}"
+                )
+            frame = pd.read_csv(
+                source, usecols=["pdb_file", *distance_columns]
+            )
+            frame = frame.loc[_basename(frame["pdb_file"]).isin(allowed)]
+            frame["_model"] = _basename(frame["pdb_file"])
+            for partner_number, partner in {
+                318: "L316 (S4–S5 linker)",
+                331: "L329 (neighboring S5)",
+                405: "L403 (neighboring S6)",
+            }.items():
+                partner_columns = [
+                    column for column in distance_columns
+                    if re.search(
+                        fr"(?:^|[A-Z]){partner_number}[A-D](?:-|$)", column
+                    )
+                ]
+                values = frame[partner_columns].apply(
+                    pd.to_numeric, errors="coerce"
+                )
+                nearest = values.min(axis=1)
+                for model_name, distance in zip(frame["_model"], nearest):
+                    records.append({
+                        "Sequence": sequence_label,
+                        "Protocol": protocol.capitalize(),
+                        "Contact": partner,
+                        "Model": model_name,
+                        "Nearest distance (Å)": distance,
+                        "number_of_available_pairs": len(partner_columns),
+                    })
     model_table = pd.DataFrame(records).dropna(subset=["Nearest distance (Å)"])
     summary = (
-        model_table.groupby(["Protocol", "Contact"], as_index=False)
+        model_table.groupby(
+            ["Sequence", "Protocol", "Contact"], as_index=False
+        )
         .agg(
             n=("Nearest distance (Å)", "size"),
             median_nearest_A=("Nearest distance (Å)", "median"),
@@ -289,7 +311,8 @@ def experimental_contact_signature(repo_root: str | Path) -> pd.DataFrame:
 
 
 def plot_contact_signature(summary: pd.DataFrame):
-    """Show protocol-dependent retention of the three nexus contacts."""
+    """Show protocol-dependent retention of the three F412L nexus contacts."""
+    summary = summary.loc[summary["Sequence"].eq("F412L")].copy()
     order = [
         "L316 (S4–S5 linker)", "L329 (neighboring S5)", "L403 (neighboring S6)"
     ]
@@ -305,23 +328,38 @@ def plot_contact_signature(summary: pd.DataFrame):
     ax.set_title(format_channel_title(
                  "Kv2.1 | F412L | hydrophobic-nexus contacts"),
                  fontweight="bold")
-    ax.legend(title="Prediction protocol", frameon=False)
+    handles, labels = ax.get_legend_handles_labels()
+    legend = ax.get_legend()
+    if legend is not None:
+        legend.remove()
+    fig.legend(
+        handles=handles, labels=labels, title="Prediction protocol",
+        frameon=False, ncol=2, loc="lower center",
+        bbox_to_anchor=(.5, .015),
+    )
     ax.grid(axis="y", linestyle="--", linewidth=.45, color="#E5E8E6")
     sns.despine(ax=ax)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, .16, 1, 1))
     return fig
 
 
 def plot_contact_distances(model_table: pd.DataFrame, experimental: pd.DataFrame):
-    """Compare L412 prediction distances with F412 experimental references."""
+    """Compare WT F412 and F412L L412 nexus-distance distributions."""
     order = [
         "L316 (S4–S5 linker)", "L329 (neighboring S5)", "L403 (neighboring S6)"
     ]
-    fig, ax = plt.subplots(figsize=(9.2, 5.2))
-    sns.violinplot(
-        data=model_table, x="Contact", y="Nearest distance (Å)", hue="Protocol",
-        order=order, hue_order=["Vanilla", "Masked"], split=True, inner="quartile",
-        cut=0, palette={"Vanilla": VANILLA, "Masked": MASKED}, linewidth=.65, ax=ax,
+    protocol_palettes = {
+        "Vanilla": {
+            "WT": KV21_PALETTE["WT_VAN"],
+            "F412L": KV21_PALETTE["F412L_VAN"],
+        },
+        "Masked": {
+            "WT": KV21_PALETTE["WT_HM"],
+            "F412L": KV21_PALETTE["F412L_HM"],
+        },
+    }
+    fig, axes = plt.subplots(
+        1, 2, figsize=(12.4, 5.7), sharey=True, squeeze=False
     )
     offsets = {"8SD3 | WT": -.18, "8SDA | L403A": .18}
     colors = {
@@ -332,45 +370,230 @@ def plot_contact_distances(model_table: pd.DataFrame, experimental: pd.DataFrame
         "8SD3 | WT": RMSD_REFERENCE_STYLES["8SD3"]["marker"],
         "8SDA | L403A": RMSD_REFERENCE_STYLES["8SDA"]["marker"],
     }
-    for reference, part in experimental.groupby("Reference"):
+    for panel_index, protocol in enumerate(("Vanilla", "Masked")):
+        ax = axes[0, panel_index]
+        part = model_table.loc[model_table["Protocol"].eq(protocol)]
+        sns.violinplot(
+            data=part,
+            x="Contact",
+            y="Nearest distance (Å)",
+            hue="Sequence",
+            order=order,
+            hue_order=["WT", "F412L"],
+            split=True,
+            inner="quartile",
+            cut=0,
+            palette=protocol_palettes[protocol],
+            linewidth=.65,
+            ax=ax,
+        )
+        for reference, reference_part in experimental.groupby("Reference"):
+            for index, contact in enumerate(order):
+                values = reference_part.loc[
+                    reference_part["Contact"].eq(contact),
+                    "Shortest heavy-atom distance (Å)",
+                ]
+                ax.scatter(
+                    np.full(len(values), index + offsets[reference]),
+                    values,
+                    s=28,
+                    marker=markers[reference],
+                    facecolor="white",
+                    edgecolor=colors[reference],
+                    linewidth=1.15,
+                    zorder=5,
+                )
+        ax.axhline(4, color="#71637A", linestyle="--", linewidth=.8)
+        ax.set_xticks(range(len(order)), [
+            "F412/L412→L316\nsame-chain S4–S5 linker",
+            "F412/L412→L329\nclosest neighboring S5",
+            "F412/L412→L403\nclosest neighboring S6",
+        ])
+        ax.set_xlabel("Hydrophobic-nexus interaction")
+        ax.set_ylabel(
+            "Shortest heavy-atom distance (Å)" if panel_index == 0 else ""
+        )
+        ax.set_title(protocol.lower(), fontweight="bold")
+        legend = ax.get_legend()
+        if legend is not None:
+            legend.remove()
+        ax.grid(axis="y", linestyle="--", linewidth=.45, color="#E5E8E6")
+        sns.despine(ax=ax)
+    legend_handles = [
+        Patch(
+            facecolor=KV21_PALETTE["WT_VAN"],
+            edgecolor="#425047",
+            linewidth=.65,
+            label="WT | vanilla",
+        ),
+        Patch(
+            facecolor=KV21_PALETTE["F412L_VAN"],
+            edgecolor="#425047",
+            linewidth=.65,
+            label="F412L | vanilla",
+        ),
+        Patch(
+            facecolor=KV21_PALETTE["WT_HM"],
+            edgecolor="#425047",
+            linewidth=.65,
+            label="WT | masked",
+        ),
+        Patch(
+            facecolor=KV21_PALETTE["F412L_HM"],
+            edgecolor="#425047",
+            linewidth=.65,
+            label="F412L | masked",
+        ),
+    ]
+    for reference in ("8SD3 | WT", "8SDA | L403A"):
+        legend_handles.append(
+            Line2D(
+                [0],
+                [0],
+                linestyle="",
+                marker=markers[reference],
+                markerfacecolor="white",
+                markeredgecolor=colors[reference],
+                markeredgewidth=1.15,
+                markersize=6,
+                label=reference,
+            )
+        )
+    fig.legend(
+        handles=legend_handles,
+        title="F412L ensembles and Kv2.1 references",
+        frameon=False,
+        ncol=3,
+        loc="lower center",
+        bbox_to_anchor=(.5, .065),
+    )
+    fig.suptitle(
+        format_channel_title(
+            "Kv2.1 | WT vs F412L | hydrophobic-nexus geometry"
+        ),
+        fontweight="bold",
+        y=.99,
+    )
+    fig.text(
+        .5, .012,
+        "Left violin half: WT F412; right half: F412L L412. "
+        "Experimental markers: F412 in 8SD3 WT and chain-resolved 8SDA "
+        "L403A. Dashed line: 4 Å proximity guide.",
+        ha="center", fontsize=8.7, color="#665A70",
+    )
+    fig.tight_layout(rect=(0, .17, 1, .93))
+    return fig
+
+
+def plot_f412l_contact_distances(
+    model_table: pd.DataFrame, experimental: pd.DataFrame
+):
+    """Show F412L vanilla and masked ensembles as paired split violins."""
+    order = [
+        "L316 (S4–S5 linker)", "L329 (neighboring S5)",
+        "L403 (neighboring S6)",
+    ]
+    protocol_colors = {
+        "Vanilla": KV21_PALETTE["F412L_VAN"],
+        "Masked": KV21_PALETTE["F412L_HM"],
+    }
+    offsets = {"8SD3 | WT": -.10, "8SDA | L403A": .10}
+    colors = {
+        "8SD3 | WT": RMSD_REFERENCE_STYLES["8SD3"]["color"],
+        "8SDA | L403A": RMSD_REFERENCE_STYLES["8SDA"]["color"],
+    }
+    markers = {
+        "8SD3 | WT": RMSD_REFERENCE_STYLES["8SD3"]["marker"],
+        "8SDA | L403A": RMSD_REFERENCE_STYLES["8SDA"]["marker"],
+    }
+    mutant = model_table.loc[model_table["Sequence"].eq("F412L")].copy()
+    fig, ax = plt.subplots(figsize=(9.8, 6.2))
+    sns.violinplot(
+        data=mutant,
+        x="Contact",
+        y="Nearest distance (Å)",
+        hue="Protocol",
+        order=order,
+        hue_order=["Vanilla", "Masked"],
+        split=True,
+        inner="quartile",
+        cut=0,
+        palette=protocol_colors,
+        linewidth=.70,
+        ax=ax,
+    )
+    for reference, reference_part in experimental.groupby("Reference"):
         for index, contact in enumerate(order):
-            values = part.loc[
-                part["Contact"].eq(contact), "Shortest heavy-atom distance (Å)"
+            values = reference_part.loc[
+                reference_part["Contact"].eq(contact),
+                "Shortest heavy-atom distance (Å)",
             ]
             ax.scatter(
-                np.full(len(values), index + offsets[reference]), values,
-                s=28, marker=markers[reference], facecolor="white",
-                edgecolor=colors[reference], linewidth=1.15, zorder=5,
-                label=reference if index == 0 else None,
+                np.full(len(values), index + offsets[reference]),
+                values,
+                s=28,
+                marker=markers[reference],
+                facecolor="white",
+                edgecolor=colors[reference],
+                linewidth=1.15,
+                zorder=5,
             )
-    handles, labels = ax.get_legend_handles_labels()
-    unique = dict(zip(labels, handles))
-    ax.legend(unique.values(), unique.keys(),
-              title="F412L ensembles and F412 references",
-              frameon=False, ncol=2)
     ax.axhline(4, color="#71637A", linestyle="--", linewidth=.8)
     ax.set_xticks(range(len(order)), [
         "L412→L316\nsame-chain S4–S5 linker",
         "L412→L329\nclosest neighboring S5",
         "L412→L403\nclosest neighboring S6",
     ])
-    ax.set_xlabel("Nexus distance in F412L predictions")
+    ax.set_xlabel("Hydrophobic-nexus interaction")
     ax.set_ylabel("Shortest heavy-atom distance (Å)")
-    ax.set_title(
-        format_channel_title(
-            "Kv2.1 | F412L | L412-centered hydrophobic-nexus geometry"
-        ),
-        fontweight="bold",
-    )
-    fig.text(
-        .5, .01,
-        "Violins: L412 in F412L predictions. Experimental markers: F412 in "
-        "8SD3 WT and 8SDA L403A. Dashed line: 4 Å proximity guide.",
-        ha="center", fontsize=8.7, color="#665A70",
-    )
+    automatic_legend = ax.get_legend()
+    if automatic_legend is not None:
+        automatic_legend.remove()
     ax.grid(axis="y", linestyle="--", linewidth=.45, color="#E5E8E6")
     sns.despine(ax=ax)
-    fig.tight_layout(rect=(0, .07, 1, 1))
+    legend_handles = [
+        Patch(
+            facecolor=protocol_colors["Vanilla"],
+            edgecolor="#425047",
+            linewidth=.65,
+            label="F412L | vanilla",
+        ),
+        Patch(
+            facecolor=protocol_colors["Masked"],
+            edgecolor="#425047",
+            linewidth=.65,
+            label="F412L | masked",
+        ),
+    ]
+    for reference in ("8SD3 | WT", "8SDA | L403A"):
+        legend_handles.append(
+            Line2D(
+                [0], [0], linestyle="", marker=markers[reference],
+                markerfacecolor="white", markeredgecolor=colors[reference],
+                markeredgewidth=1.15, markersize=6, label=reference,
+            )
+        )
+    fig.legend(
+        handles=legend_handles,
+        title="F412L ensembles and Kv2.1 references",
+        frameon=False,
+        ncol=4,
+        loc="lower center",
+        bbox_to_anchor=(.5, .065),
+    )
+    fig.suptitle(
+        format_channel_title("Kv2.1 | F412L | hydrophobic-nexus geometry"),
+        fontweight="bold",
+        y=.99,
+    )
+    fig.text(
+        .5, .012,
+        "Left violin half: F412L vanilla; right half: F412L masked. "
+        "Experimental markers: F412 in 8SD3 WT and chain-resolved 8SDA "
+        "L403A. Dashed line: 4 Å proximity guide.",
+        ha="center", fontsize=8.7, color="#665A70",
+    )
+    fig.tight_layout(rect=(0, .17, 1, .93))
     return fig
 
 
@@ -390,8 +613,18 @@ def write_nexus_outputs(repo_root: str | Path):
 
     preference.to_csv(output / "reference_preference_summary.csv", index=False)
     representatives.to_csv(output / "representative_model_ranking.csv", index=False)
-    contact_pairs.to_csv(output / "f412l_nexus_contact_chain_pairs.csv", index=False)
-    contacts.to_csv(output / "f412l_nexus_contact_summary.csv", index=False)
+    contact_pairs.to_csv(
+        output / "wt_f412l_nexus_contact_chain_pairs.csv", index=False
+    )
+    contacts.to_csv(
+        output / "wt_f412l_nexus_contact_summary.csv", index=False
+    )
+    contact_pairs.loc[contact_pairs["Sequence"].eq("F412L")].to_csv(
+        output / "f412l_nexus_contact_chain_pairs.csv", index=False
+    )
+    contacts.loc[contacts["Sequence"].eq("F412L")].to_csv(
+        output / "f412l_nexus_contact_summary.csv", index=False
+    )
     experimental.to_csv(output / "experimental_nexus_contacts.csv", index=False)
 
     preference_figure = plot_preference(preference)
@@ -407,10 +640,18 @@ def write_nexus_outputs(repo_root: str | Path):
         figures / "f412l_nexus_geometry_vs_experiment.png",
         dpi=400, bbox_inches="tight",
     )
+    mutant_geometry_figure = plot_f412l_contact_distances(
+        contact_pairs, experimental
+    )
+    mutant_geometry_figure.savefig(
+        figures / "f412l_only_nexus_geometry_vs_experiment.png",
+        dpi=400, bbox_inches="tight",
+    )
     return {
         "rmsd": rmsd, "paired": paired, "preference": preference,
         "representatives": representatives, "contact_pairs": contact_pairs,
         "contacts": contacts, "preference_figure": preference_figure,
         "experimental": experimental, "contact_figure": contact_figure,
         "geometry_figure": geometry_figure,
+        "mutant_geometry_figure": mutant_geometry_figure,
     }

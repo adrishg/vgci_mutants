@@ -31,6 +31,27 @@ TOPOLOGY_PROVENANCE = {
     },
 }
 
+# Plotting coordinates are converted from the raw AlphaFold construct to the
+# channel sequence numbering used in the manuscript.  Analysis tables retain
+# raw model positions so that every plotted point remains traceable.
+SEQUENCE_NUMBERING = {
+    "kv21": {
+        "display_shift": -2,
+        "axis_label": r"$\mathrm{K}_{\mathrm{V}}2.1$ sequence residue number",
+        "core_display_window": (170, 440),
+    },
+    "nav15": {
+        "display_shift": 316,
+        "axis_label": r"$\mathrm{Na}_{\mathrm{V}}1.5$ sequence residue number",
+        "core_display_window": (101, 1485),
+    },
+    "cav12": {
+        "display_shift": 0,
+        "axis_label": r"$\mathrm{Ca}_{\mathrm{V}}1.2$ sequence residue number",
+        "core_display_window": (95, 1554),
+    },
+}
+
 TOPOLOGY = {
     "kv21": [
         {"label": "S1", "start": 185, "end": 206, "domain": "VSD", "confidence": "reviewed/mapped"},

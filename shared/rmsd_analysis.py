@@ -56,17 +56,47 @@ def apply_kv21_rmsd_qc(
     allowlists: dict[tuple[str, str], set[str]] = {}
     for condition in ("wt", "l403a", "f412l"):
         for protocol in ("vanilla", "masked"):
-            matches = sorted(
-                (root / "kv21/dataDistances").glob(
-                    f"*{condition}_{protocol}*structural_interface_qc.csv"
-                )
+            data_root = root / "kv21/dataDistances"
+            candidates = sorted(
+                set(data_root.glob(
+                    f"*{condition}_{protocol}AF2*"
+                    "structural_interface_alignment_qc.csv"
+                ))
+                | set(data_root.glob(
+                    f"*{condition}_{protocol}AF2*"
+                    "structural_interface_qc.csv"
+                ))
             )
-            if len(matches) != 1:
+            valid = []
+            rejected = []
+            for candidate in candidates:
+                columns = pd.read_csv(candidate, nrows=0).columns
+                if "pdb_file" in columns:
+                    valid.append(candidate)
+                else:
+                    rejected.append(candidate)
+            canonical = [
+                path for path in valid if "AF2test" not in path.name
+            ]
+            if canonical:
+                valid = canonical
+            alignment_qc = [
+                path for path in valid
+                if path.name.endswith(
+                    "structural_interface_alignment_qc.csv"
+                )
+            ]
+            if alignment_qc:
+                valid = alignment_qc
+            if len(valid) != 1:
                 raise FileNotFoundError(
                     f"Expected one Kv2.1 structural-interface allowlist for "
-                    f"{condition}/{protocol}; found {matches}"
+                    f"{condition}/{protocol}; valid={valid}; "
+                    f"rejected non-tabular/LFS pointers={rejected}"
                 )
-            values = pd.read_csv(matches[0], usecols=["pdb_file"])["pdb_file"]
+            values = pd.read_csv(
+                valid[0], usecols=["pdb_file"]
+            )["pdb_file"]
             allowlists[(condition, protocol)] = set(
                 values.astype(str).map(lambda x: Path(x).name)
             )
