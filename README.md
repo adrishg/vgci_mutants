@@ -1,4 +1,10 @@
-# Voltage-gated ion-channel mutant ensembles
+# Targeted MSA Masking Reshapes Structural Sampling in Mutant Voltage-Gated Ion Channels
+
+Analysis and validation repository for the paper **“Targeted MSA Masking Reshapes Structural
+Sampling in Mutant Voltage-Gated Ion Channels.”**
+
+The structural ensembles and associated dataset files are available on Hugging Face:
+[adrishgz/vgic-mutant-structural-ensembles](https://huggingface.co/datasets/adrishgz/vgic-mutant-structural-ensembles).
 
 This is the **analysis and validation repository** for AlphaFold2 conformational ensembles of three
 voltage-gated ion channels: Cav1.2, Kv2.1, and Nav1.5. It compares vanilla and targeted-masked
@@ -139,7 +145,6 @@ additional variability is localized and experimentally meaningful.
 ├── docs/
 │   ├── FIGURE_INDEX.md
 │   ├── audits/
-│   ├── status/
 │   └── workflows/
 ├── shared/
 │   ├── dataset_selection.py
@@ -168,9 +173,7 @@ The root contains only this project overview. Supporting documentation is groupe
 
 - [Figure and notebook index](docs/FIGURE_INDEX.md)
 - [Experimental-comparison RMSD workflow](docs/workflows/RMSD_WORKFLOW.md)
-- [Final presentation and consistency audit](docs/status/PRESENTATION_AUDIT.md)
-- [Current RMSF analysis status](docs/status/RMSF_ANALYSIS_STATUS.md)
-- [Production A3M provenance](docs/status/A3M_PROVENANCE.md)
+- [Production A3M provenance](docs/workflows/A3M_PROVENANCE.md)
 - [Nav1.5 retrospective distance audit](docs/audits/NAV15_DISTANCE_RETROSPECTIVE_AUDIT.md)
 
 Operational instructions and validation records remain beside the scripts they document. In

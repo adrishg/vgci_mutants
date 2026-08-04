@@ -50,7 +50,7 @@ def make_notebook(channel, config):
     cells = [
         nbf.v4.new_markdown_cell(
             f"# {config['title']}\n\n"
-            "This notebook compares structural variability across independently predicted AlphaFold "
+            "Here we compare structural variability across independent AlphaFold "
             "ensembles generated with the original MSA (vanilla) and with targeted regions of the "
             "MSA masked. The central question is whether masking broadens or narrows the conformational "
             "ensemble locally, and whether those changes extend beyond the residues whose evolutionary "

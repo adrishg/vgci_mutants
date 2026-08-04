@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
+from .plotting import experimental_reference_style
 from .structure_distances import read_ca_residues
 
 
@@ -127,17 +128,13 @@ def plot_ifm_joint(
             y=part["IFM2"], bins=38, stat="count", element="step", fill=True,
             alpha=0.28, color=color, linewidth=1.0, ax=grid.ax_marg_y,
         )
-    markers = ["o", "s", "D", "^", "v", "P", "X", "*"]
-    point_colors = [
-        "#F28E8E", "#F2A65A", "#E76FAD", "#7E57C2",
-        "#26A69A", "#D4A017", "#5C6BC0", "#8D6E63",
-    ]
     for index, (pdb_id, values) in enumerate(experimental_distances.items()):
+        style = experimental_reference_style(pdb_id, index)
         axis.scatter(
             values["IFM1"], values["IFM2"],
-            marker=markers[index % len(markers)], s=46,
+            marker=style["marker"], s=46,
             facecolor="white",
-            edgecolor=point_colors[index % len(point_colors)], linewidth=1.2,
+            edgecolor=style["color"], linewidth=1.2,
             zorder=12, label=f"Experimental | {pdb_id} | WT IFM engaged",
         )
     for index, (ensemble, label) in enumerate(histogram_annotations):
@@ -224,13 +221,12 @@ def plot_missing_af2_panel(
     subset,
 ):
     figure, axis = plt.subplots(figsize=(7, 6))
-    markers = ["o", "s", "D", "^", "v", "P", "X", "*"]
-    colors = ["#D55E00", "#0072B2", "#009E73", "#CC79A7"]
     for index, (pdb_id, values) in enumerate(experimental_distances.items()):
+        style = experimental_reference_style(pdb_id, index)
         axis.scatter(
             values["IFM1"], values["IFM2"],
-            marker=markers[index % len(markers)], s=110,
-            color=colors[index % len(colors)], edgecolor="white", linewidth=0.7,
+            marker=style["marker"], s=110,
+            color=style["color"], edgecolor="white", linewidth=0.7,
         )
         axis.annotate(
             pdb_id, (values["IFM1"], values["IFM2"]),
@@ -285,16 +281,12 @@ def plot_shortest_engagement_contacts(
             values[x], values[y], s=14, alpha=0.38, color=colors[ensemble],
             edgecolor="none", rasterized=True, label=ensemble,
         )
-    markers = ["o", "s", "D", "^", "v", "P", "X", "*"]
-    point_colors = [
-        "#F28E8E", "#F2A65A", "#E76FAD", "#7E57C2",
-        "#26A69A", "#D4A017", "#5C6BC0", "#8D6E63",
-    ]
     for index, (pdb_id, values) in enumerate(experimental_distances.items()):
+        style = experimental_reference_style(pdb_id, index)
         axis.scatter(
-            values[x], values[y], marker=markers[index % len(markers)], s=38,
+            values[x], values[y], marker=style["marker"], s=38,
             facecolor="white",
-            edgecolor=point_colors[index % len(point_colors)], linewidth=1.1,
+            edgecolor=style["color"], linewidth=1.1,
             zorder=10, label=f"{pdb_id} | WT IFM reference",
         )
     axis.set_xlabel(
@@ -326,12 +318,13 @@ def plot_shortest_engagement_contacts(
     experimental_offsets = np.linspace(
         -0.18, 0.18, len(experimental_distances)
     )
-    for index, (_, values) in enumerate(experimental_distances.items()):
+    for index, (pdb_id, values) in enumerate(experimental_distances.items()):
+        style = experimental_reference_style(pdb_id, index)
         axes[1].scatter(
             [experimental_offsets[index]],
             [values[summary_metric]],
-            marker=markers[index % len(markers)], s=32, facecolor="white",
-            edgecolor=point_colors[index % len(point_colors)],
+            marker=style["marker"], s=32, facecolor="white",
+            edgecolor=style["color"],
             linewidth=1.0, zorder=10,
         )
     axes[1].set_xlabel("Ensemble")

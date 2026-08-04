@@ -37,7 +37,7 @@ def notebook(channel: str, condition: str, source: Path) -> nbf.NotebookNode:
     cells = [
         nbf.v4.new_markdown_cell(
             f"# {title}\n\n"
-            "This notebook compares complete RMSD distributions for vanilla and targeted-MSA-masked "
+            "Here, vanilla and targeted-MSA-masked RMSD distributions are compared "
             "ensembles after the established 3 Å convergence filter. For Kv2.1, the convergence "
             "manifest is joined explicitly by PDB basename and rows flagged by the corrected v2 "
             "chain-mapping analysis are excluded. Each experimental reference is kept separate. "

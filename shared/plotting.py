@@ -18,7 +18,7 @@ import pandas as pd
 import seaborn as sns
 
 
-STYLE_VERSION = "channel-mathtext-v7-cav12-amber-references"
+STYLE_VERSION = "channel-mathtext-v8-canonical-experimental-references"
 
 
 KV21_PALETTE = {
@@ -402,8 +402,13 @@ def plot_distances_by_alias_violin(
     )
     _tint_violin_borders(ax)
     if exp_distances_list and dataset_labels:
-        marker_styles = EXPERIMENTAL_MARKERS
-        point_colors = list(pdb_colors) if pdb_colors and len(pdb_colors) == len(exp_distances_list) else [KV21_PALETTE["experimental"]] * len(exp_distances_list)
+        reference_styles = [
+            experimental_reference_style(label, index)
+            for index, label in enumerate(dataset_labels)
+        ]
+        if pdb_colors and len(pdb_colors) == len(reference_styles):
+            for style, color in zip(reference_styles, pdb_colors):
+                style["color"] = color
         used = [False] * len(exp_distances_list)
         for i, distances in enumerate(exp_distances_list):
             offset = (i - (len(exp_distances_list) - 1) / 2) * 0.07
@@ -412,8 +417,8 @@ def plot_distances_by_alias_violin(
                     continue
                 xpos = list(aliases).index(alias) + offset
                 for value in values:
-                    ax.scatter(xpos, value, facecolors="white", edgecolors=point_colors[i],
-                               marker=marker_styles[i % len(marker_styles)], s=34, linewidths=0.8, zorder=6,
+                    ax.scatter(xpos, value, facecolors="white", edgecolors=reference_styles[i]["color"],
+                               marker=reference_styles[i]["marker"], s=34, linewidths=0.8, zorder=6,
                                label=(dataset_labels[i] if str(dataset_labels[i]).startswith("Experimental |") else "Experimental | " + str(dataset_labels[i])) if not used[i] else None)
                     used[i] = True
     has_legend = bool(ax.get_legend_handles_labels()[1])
@@ -490,11 +495,13 @@ def plot_protocol_split_with_experimentals(
     )
     _tint_violin_borders(ax)
     if exp_distances_list and dataset_labels:
-        point_colors = (
-            list(pdb_colors)
-            if pdb_colors and len(pdb_colors) == len(exp_distances_list)
-            else [KV21_PALETTE["experimental"]] * len(exp_distances_list)
-        )
+        reference_styles = [
+            experimental_reference_style(label, index)
+            for index, label in enumerate(dataset_labels)
+        ]
+        if pdb_colors and len(pdb_colors) == len(reference_styles):
+            for style, color in zip(reference_styles, pdb_colors):
+                style["color"] = color
         used = [False] * len(exp_distances_list)
         for index, distances in enumerate(exp_distances_list):
             offset = (index - (len(exp_distances_list) - 1) / 2) * 0.07
@@ -507,8 +514,9 @@ def plot_protocol_split_with_experimentals(
                     if not label.startswith("Experimental |"):
                         label = "Experimental | " + label
                     ax.scatter(
-                        xpos, value, facecolors="white", edgecolors=point_colors[index],
-                        marker=EXPERIMENTAL_MARKERS[index % len(EXPERIMENTAL_MARKERS)],
+                        xpos, value, facecolors="white",
+                        edgecolors=reference_styles[index]["color"],
+                        marker=reference_styles[index]["marker"],
                         s=34, linewidths=0.8, zorder=6,
                         label=label if not used[index] else None,
                     )
@@ -617,11 +625,13 @@ def plot_distances_by_alias_violin_overlay(
         if isinstance(collection, PolyCollection):
             collection.set_alpha(alpha)
     if exp_distances_list and dataset_labels:
-        point_colors = (
-            list(pdb_colors)
-            if pdb_colors and len(pdb_colors) == len(exp_distances_list)
-            else [KV21_PALETTE["experimental"]] * len(exp_distances_list)
-        )
+        reference_styles = [
+            experimental_reference_style(label, index)
+            for index, label in enumerate(dataset_labels)
+        ]
+        if pdb_colors and len(pdb_colors) == len(reference_styles):
+            for style, color in zip(reference_styles, pdb_colors):
+                style["color"] = color
         used = [False] * len(exp_distances_list)
         for index, distances in enumerate(exp_distances_list):
             offset = (index - (len(exp_distances_list) - 1) / 2) * 0.07
@@ -631,8 +641,9 @@ def plot_distances_by_alias_violin_overlay(
                 for value in values:
                     ax.scatter(
                         list(aliases).index(alias) + offset, value,
-                        facecolors="white", edgecolors=point_colors[index],
-                        marker=EXPERIMENTAL_MARKERS[index % len(EXPERIMENTAL_MARKERS)],
+                        facecolors="white",
+                        edgecolors=reference_styles[index]["color"],
+                        marker=reference_styles[index]["marker"],
                         s=34, linewidths=0.8, zorder=6,
                         label=dataset_labels[index] if not used[index] else None,
                     )
@@ -780,11 +791,13 @@ def plot_split_ensemble_with_experimentals(
     _tint_violin_borders(ax)
 
     if exp_distances_list and dataset_labels:
-        point_colors = (
-            list(pdb_colors)
-            if pdb_colors and len(pdb_colors) == len(exp_distances_list)
-            else [KV21_PALETTE["experimental"]] * len(exp_distances_list)
-        )
+        reference_styles = [
+            experimental_reference_style(label, index)
+            for index, label in enumerate(dataset_labels)
+        ]
+        if pdb_colors and len(pdb_colors) == len(reference_styles):
+            for style, color in zip(reference_styles, pdb_colors):
+                style["color"] = color
         used = [False] * len(exp_distances_list)
         for i, distances in enumerate(exp_distances_list):
             for alias, values in distances.items():
@@ -796,8 +809,9 @@ def plot_split_ensemble_with_experimentals(
                     if not str(label).startswith("Experimental |"):
                         label = "Experimental | " + str(label)
                     ax.scatter(
-                        xpos, value, facecolors="white", edgecolors=point_colors[i],
-                        marker=EXPERIMENTAL_MARKERS[i % len(EXPERIMENTAL_MARKERS)],
+                        xpos, value, facecolors="white",
+                        edgecolors=reference_styles[i]["color"],
+                        marker=reference_styles[i]["marker"],
                         s=34, linewidths=0.8, zorder=6,
                         label=label if not used[i] else None,
                     )
@@ -878,15 +892,18 @@ def plot_l403a_chain_c_interface_figure(
         ax=main_axis,
     )
     _tint_violin_borders(main_axis)
+    wt_reference_style = experimental_reference_style("8SD3")
+    mutant_reference_style = experimental_reference_style("8SDA")
     for index, alias in enumerate(chain_c):
-        for values, color, marker in (
-            (experimental_wt.get(alias, []), "#D55E00", "o"),
-            (experimental_l403a.get(alias, []), "#0072B2", "s"),
+        for values, style in (
+            (experimental_wt.get(alias, []), wt_reference_style),
+            (experimental_l403a.get(alias, []), mutant_reference_style),
         ):
             for value in values:
                 main_axis.scatter(
-                    index, value, s=31, marker=marker, facecolors="white",
-                    edgecolors=color, linewidths=0.9, zorder=8,
+                    index, value, s=31, marker=style["marker"],
+                    facecolors="white", edgecolors=style["color"],
+                    linewidths=0.9, zorder=8,
                 )
     main_axis.set(
         title="Chain C pore–VSD interface",
@@ -930,14 +947,14 @@ def plot_l403a_chain_c_interface_figure(
     _tint_violin_borders(context_axis)
     for chain_index, chain in enumerate(chains):
         alias = f"E423{chain}-N179{chain}"
-        for values, color, marker in (
-            (experimental_wt.get(alias, []), "#D55E00", "o"),
-            (experimental_l403a.get(alias, []), "#0072B2", "s"),
+        for values, style in (
+            (experimental_wt.get(alias, []), wt_reference_style),
+            (experimental_l403a.get(alias, []), mutant_reference_style),
         ):
             for value in values:
                 context_axis.scatter(
-                    chain_index, value, s=31, marker=marker,
-                    facecolors="white", edgecolors=color,
+                    chain_index, value, s=31, marker=style["marker"],
+                    facecolors="white", edgecolors=style["color"],
                     linewidths=0.9, zorder=8,
                 )
     context_axis.set(
@@ -955,11 +972,15 @@ def plot_l403a_chain_c_interface_figure(
               label="L403A | vanilla"),
         Patch(facecolor=KV21_PALETTE["L403A_HM"], edgecolor="#356D46",
               label="L403A | masked"),
-        Line2D([0], [0], color="none", marker="o", markersize=6,
-               markerfacecolor="white", markeredgecolor="#D55E00",
+        Line2D([0], [0], color="none",
+               marker=wt_reference_style["marker"], markersize=6,
+               markerfacecolor="white",
+               markeredgecolor=wt_reference_style["color"],
                label="Experimental | 8SD3 WT"),
-        Line2D([0], [0], color="none", marker="s", markersize=6,
-               markerfacecolor="white", markeredgecolor="#0072B2",
+        Line2D([0], [0], color="none",
+               marker=mutant_reference_style["marker"], markersize=6,
+               markerfacecolor="white",
+               markeredgecolor=mutant_reference_style["color"],
                label="Experimental | 8SDA L403A"),
     ]
     figure.legend(
@@ -1021,16 +1042,18 @@ def plot_l403a_e423_n179_figure(
         ax=axis,
     )
     _tint_violin_borders(axis)
+    wt_reference_style = experimental_reference_style("8SD3")
+    mutant_reference_style = experimental_reference_style("8SDA")
     for chain_index, chain in enumerate(available_chains):
         alias = f"E423{chain}-N179{chain}"
-        for values, color, marker in (
-            (experimental_wt.get(alias, []), "#D55E00", "o"),
-            (experimental_l403a.get(alias, []), "#0072B2", "s"),
+        for values, style in (
+            (experimental_wt.get(alias, []), wt_reference_style),
+            (experimental_l403a.get(alias, []), mutant_reference_style),
         ):
             for value in values:
                 axis.scatter(
-                    chain_index, value, s=34, marker=marker,
-                    facecolors="white", edgecolors=color,
+                    chain_index, value, s=34, marker=style["marker"],
+                    facecolors="white", edgecolors=style["color"],
                     linewidths=0.9, zorder=8,
                 )
     if axis.get_legend() is not None:
@@ -1053,13 +1076,17 @@ def plot_l403a_e423_n179_figure(
                 edgecolor="#356D46", label="L403A | masked",
             ),
             Line2D(
-                [0], [0], color="none", marker="o", markersize=6,
-                markerfacecolor="white", markeredgecolor="#D55E00",
+                [0], [0], color="none",
+                marker=wt_reference_style["marker"], markersize=6,
+                markerfacecolor="white",
+                markeredgecolor=wt_reference_style["color"],
                 label="Experimental | 8SD3 WT",
             ),
             Line2D(
-                [0], [0], color="none", marker="s", markersize=6,
-                markerfacecolor="white", markeredgecolor="#0072B2",
+                [0], [0], color="none",
+                marker=mutant_reference_style["marker"], markersize=6,
+                markerfacecolor="white",
+                markeredgecolor=mutant_reference_style["color"],
                 label="Experimental | 8SDA L403A",
             ),
         ],

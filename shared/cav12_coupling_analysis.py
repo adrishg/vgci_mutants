@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
+from .plotting import experimental_reference_style
+
 
 CAV12_GATE_COLUMNS = (
     "CA_LEU401_CA-LEU749_CA",
@@ -208,12 +210,13 @@ def plot_experimental_interface_landscapes(
                 color=palette[label], edgecolor="white", linewidth=0.9,
                 label=label, zorder=5,
             )
-        for marker, (pdb_id, values) in zip(("o", "s", "D"), experimental.items()):
+        for reference_index, (pdb_id, values) in enumerate(experimental.items()):
             if xcol not in values or ycol not in values:
                 continue
+            style = experimental_reference_style(pdb_id, reference_index)
             ax.scatter(
-                values[xcol], values[ycol], marker=marker, s=58,
-                facecolor="white", edgecolor="#2F2A33", linewidth=1.2,
+                values[xcol], values[ycol], marker=style["marker"], s=58,
+                facecolor="white", edgecolor=style["color"], linewidth=1.2,
                 label=f"{pdb_id} experimental", zorder=7,
             )
         ax.set(xlabel=xlabel, ylabel=ylabel, title=title)
