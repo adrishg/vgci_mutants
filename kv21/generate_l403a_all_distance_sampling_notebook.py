@@ -36,6 +36,65 @@ c.append(nbf.v4.new_markdown_cell("## Machine-readable distance-level statistics
 c.append(nbf.v4.new_code_cell("""stats=pd.read_csv(TAB/'l403a_all_distance_sampling_statistics.csv')
 display(stats[stats.depth.astype(str).isin(['1000','Full QC'])])
 print(f'{len(stats):,} distance-by-depth rows')"""))
+c.append(nbf.v4.new_markdown_cell("""## Figure S8 assembly: fixed-budget sampling breadth
+
+This cell assembles the four selected, analysis-generated panels into one editable Figure S8 layout. The source panels are not screenshots from an external document: each is generated above by `run()` from the saved analysis tables. The unequal layout preserves their native aspect ratios so the 546-distance evidence stripe remains legible.
+
+- **A:** First100 seed-level breadth, distance-wise breadth, directional test, and retention.
+- **B:** Ordered effects and directional BH-significance across all 546 distances.
+- **C:** Random-seed saturation from 1,000 subsets per seed budget.
+- **D:** First100-versus-full directional-broadening concordance.
+"""))
+c.append(nbf.v4.new_code_cell("""from PIL import Image as PILImage, ImageChops
+import matplotlib.pyplot as plt
+
+panel_paths = {
+    'A': FIG/'first100_masked_sampling_breadth_main_summary.png',
+    'B': FIG/'first100_all_distance_breadth_evidence_map.png',
+    'C': FIG/'random_seed_sampling_efficiency_saturation.png',
+    'D': FIG/'first100_vs_full_broadening_concordance_heatmap.png',
+}
+
+def trim_white_margin(path, tolerance=8):
+    image = PILImage.open(path).convert('RGB')
+    background = PILImage.new('RGB', image.size, (255, 255, 255))
+    difference = ImageChops.difference(image, background).convert('L')
+    difference = difference.point(lambda value: 255 if value > tolerance else 0)
+    bounds = difference.getbbox()
+    return image.crop(bounds) if bounds else image
+
+panels = {label: trim_white_margin(path) for label, path in panel_paths.items()}
+
+fig = plt.figure(figsize=(22, 12.5), facecolor='white')
+outer = fig.add_gridspec(2, 1, height_ratios=[1.80, 1.00], hspace=.025)
+top = outer[0].subgridspec(1, 2, width_ratios=[1, 1], wspace=.025)
+bottom = outer[1].subgridspec(1, 2, width_ratios=[3.35, 1.15], wspace=.035)
+axes = {
+    'A': fig.add_subplot(top[0, 0]),
+    'C': fig.add_subplot(top[0, 1]),
+    'B': fig.add_subplot(bottom[0, 0]),
+    'D': fig.add_subplot(bottom[0, 1]),
+}
+
+for label, axis in axes.items():
+    axis.imshow(panels[label], interpolation='lanczos')
+    axis.set_anchor('N')
+    axis.axis('off')
+    axis.text(-.055, 1.005, label, transform=axis.transAxes, ha='left', va='top',
+              fontsize=23, fontweight='bold', color='#111111',
+              bbox={'facecolor':'white','edgecolor':'none','pad':1.5})
+
+fig.subplots_adjust(left=.025, right=.995, bottom=.015, top=.995)
+composite_png = FIG/'Figure_S8_fixed_budget_sampling_breadth.png'
+composite_pdf = FIG/'Figure_S8_fixed_budget_sampling_breadth.pdf'
+fig.savefig(composite_png, dpi=300, bbox_inches='tight', facecolor='white')
+fig.savefig(composite_pdf, bbox_inches='tight', facecolor='white')
+display(fig)
+plt.close(fig)
+
+print('Saved:', composite_png.relative_to(repo_root))
+print('Saved:', composite_pdf.relative_to(repo_root))
+"""))
 c.append(nbf.v4.new_markdown_cell("## Manuscript-facing uncertainty audit"))
 c.append(nbf.v4.new_code_cell("""from analysis.statistics_revision.scripts.run_kv21_sampling_breadth_uncertainty import run as run_uncertainty
 run_uncertainty()
