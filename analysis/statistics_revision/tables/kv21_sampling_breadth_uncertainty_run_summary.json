@@ -1,0 +1,6 @@
+{
+  "first100_ratio_summary": "/Users/ahernandezgonzalez/Repositories/vgci_mutants/kv21/dataExtra/conformation_analysis/all_distance_sampling/tables/l403a_first100_seed_level_global_breadth_summary.csv",
+  "s6_all_reported_values_reproduced": false,
+  "s6_bootstrap_status": "completed for revised current estimator; historical manuscript values remain unreproduced",
+  "rmsf_bootstrap_status": "completed from aligned C-alpha arrays with trajectory-block resampling"
+}

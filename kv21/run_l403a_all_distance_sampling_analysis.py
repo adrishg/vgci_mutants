@@ -169,6 +169,15 @@ def overall_seed_breadth(frames,cols):
     rng=np.random.default_rng(403)
     boot=np.array([np.median(rng.choice(masked,len(masked),replace=True))-
                    np.median(rng.choice(vanilla,len(vanilla),replace=True)) for _ in range(10000)])
+    # Dedicated RNG: adding the ratio interval must not perturb the historical
+    # median-difference bootstrap above or any downstream stochastic analysis.
+    ratio_seed=20260803; ratio_replicates=10000
+    ratio_rng=np.random.default_rng(ratio_seed)
+    ratio_boot=np.array([
+        np.median(ratio_rng.choice(masked,len(masked),replace=True)) /
+        np.median(ratio_rng.choice(vanilla,len(vanilla),replace=True))
+        for _ in range(ratio_replicates)
+    ])
     summary=pd.DataFrame([{'vanilla_seeds':len(vanilla),'masked_seeds':len(masked),
         'vanilla_median_normalized_seed_IQR':vanilla.median(),
         'masked_median_normalized_seed_IQR':masked.median(),
@@ -176,9 +185,19 @@ def overall_seed_breadth(frames,cols):
         'median_difference_masked_minus_vanilla':masked.median()-vanilla.median(),
         'bootstrap_95CI_difference_low':np.quantile(boot,.025),
         'bootstrap_95CI_difference_high':np.quantile(boot,.975),
+        'bootstrap_95CI_ratio_low':np.quantile(ratio_boot,.025),
+        'bootstrap_95CI_ratio_high':np.quantile(ratio_boot,.975),
+        'bootstrap_ratio_replicates':ratio_replicates,
+        'bootstrap_ratio_seed':ratio_seed,
         'mannwhitney_U_masked_vs_vanilla':u,'mannwhitney_p_two_sided':p,
         'rank_biserial_masked_greater':2*u/(len(masked)*len(vanilla))-1}])
-    return values,summary
+    ratio_distribution=pd.DataFrame({
+        'bootstrap_replicate':np.arange(1,ratio_replicates+1),
+        'masked_over_vanilla_median_ratio':ratio_boot,
+        'bootstrap_seed':ratio_seed,
+        'resampling_unit':'seed',
+    })
+    return values,summary,ratio_distribution
 
 def equal_retained_count_rarefaction(frames,cols,iterations=2000):
     """Compare all masked survivors with repeated equal-sized vanilla subsets."""
@@ -636,7 +655,7 @@ def figures(results,summary,stable,frames,trajectory_audit,seed_breadth,rarefact
 def run():
     frames,cols=load(); trajectory_audit,retention_summary=nominal_trajectory_retention_audit(frames,FOCAL_DEPTH)
     results=pd.concat([analyze_depth(frames,cols,d) for d in DEPTHS],ignore_index=True); summary=summarize(results); stable=stability(results)
-    seed_breadth,seed_breadth_summary=overall_seed_breadth(frames,cols)
+    seed_breadth,seed_breadth_summary,seed_breadth_ratio_bootstrap=overall_seed_breadth(frames,cols)
     rarefaction,rarefaction_summary=equal_retained_count_rarefaction(frames,cols)
     saturation_draws,saturation_summary=random_seed_saturation(frames,cols)
     distribution_stats,distribution_stats_summary=first100_seed_block_distribution_statistics(frames,cols)
@@ -656,6 +675,9 @@ def run():
     retention_test.to_csv(TAB/'l403a_first100_qc_retention_fisher_test.csv',index=False)
     seed_breadth.to_csv(TAB/'l403a_first100_seed_level_global_breadth.csv',index=False)
     seed_breadth_summary.to_csv(TAB/'l403a_first100_seed_level_global_breadth_summary.csv',index=False)
+    seed_breadth_ratio_bootstrap.to_csv(
+        TAB/'l403a_first100_seed_level_global_breadth_ratio_bootstrap.csv',index=False
+    )
     rarefaction.to_csv(TAB/'l403a_first100_equal_count_rarefaction.csv',index=False)
     rarefaction_summary.to_csv(TAB/'l403a_first100_equal_count_rarefaction_summary.csv',index=False)
     saturation_draws.to_csv(TAB/'l403a_random_seed_saturation_draws.csv',index=False)

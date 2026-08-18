@@ -24,6 +24,7 @@ sys.path.insert(0,str(repo_root))
 from kv21.run_l403a_all_distance_sampling_analysis import run, TAB, FIG
 result=run(); print(json.dumps(result['audit'],indent=2))"""))
 c.append(nbf.v4.new_markdown_cell("## Ensemble-wide summary across sampling depths"))
+c.append(nbf.v4.new_code_cell("display(pd.read_csv(TAB/'l403a_first100_seed_level_global_breadth_summary.csv'))"))
 c.append(nbf.v4.new_code_cell("display(pd.read_csv(TAB/'l403a_all_distance_sampling_summary.csv')); display(Image(filename=str(FIG/'all_distance_breadth_fraction_by_depth.png')))"))
 c.append(nbf.v4.new_markdown_cell("## First 1,000 versus full QC"))
 c.append(nbf.v4.new_code_cell("display(pd.read_csv(TAB/'l403a_all_distance_sampling_stability.csv')); display(Image(filename=str(FIG/'first1000_vs_full_distance_breadth.png')))"))
@@ -35,6 +36,14 @@ c.append(nbf.v4.new_markdown_cell("## Machine-readable distance-level statistics
 c.append(nbf.v4.new_code_cell("""stats=pd.read_csv(TAB/'l403a_all_distance_sampling_statistics.csv')
 display(stats[stats.depth.astype(str).isin(['1000','Full QC'])])
 print(f'{len(stats):,} distance-by-depth rows')"""))
+c.append(nbf.v4.new_markdown_cell("## Manuscript-facing uncertainty audit"))
+c.append(nbf.v4.new_code_cell("""from analysis.statistics_revision.scripts.run_kv21_sampling_breadth_uncertainty import run as run_uncertainty
+run_uncertainty()
+revision_tables=repo_root/'analysis'/'statistics_revision'/'tables'
+display(pd.read_csv(TAB/'l403a_first100_seed_level_global_breadth_summary.csv'))
+display(pd.read_csv(revision_tables/'kv21_s6_masked_vs_vanilla_breadth_bootstrap.csv'))
+display(pd.read_csv(revision_tables/'kv21_rmsf_trajectory_block_bootstrap.csv'))
+display(pd.read_csv(revision_tables/'kv21_sampling_breadth_manuscript_statistics.csv'))"""))
 c.append(nbf.v4.new_markdown_cell("""## Reading guide
 
 - `global_IQR_ratio > 1` means the masked raw ensemble is broader for that distance.
