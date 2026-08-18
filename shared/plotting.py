@@ -18,7 +18,7 @@ import pandas as pd
 import seaborn as sns
 
 
-STYLE_VERSION = "channel-mathtext-v8-canonical-experimental-references"
+STYLE_VERSION = "channel-mathtext-v9-canonical-experimental-markers"
 
 
 KV21_PALETTE = {

@@ -1,0 +1,30 @@
+{
+  "shared_distance_columns_before_chain_safety_filter": 1410,
+  "analyzed_intrachain_distance_columns": 546,
+  "excluded_raw_interchain_columns": 864,
+  "distance_types": {
+    "CA": 273,
+    "shortest_heavy": 273
+  },
+  "chain_safety_rule": "Kv2.1 raw interchain columns excluded because homotetramer chain labels can permute; only same-chain pairs retained",
+  "depths_in_seeds_per_protocol": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    "Full QC"
+  ],
+  "focal_nominal_cohort": "first 20 ordered seeds \u00d7 models 1\u20135 = 100 intended trajectories per protocol",
+  "focal_depth_in_seeds_per_protocol": 20,
+  "focal_qc_retained_trajectories": {
+    "vanilla": 99,
+    "masked": 85
+  },
+  "representative_rule": "one structure per retained seed/model trajectory: latest recycle surviving final QC",
+  "ordering": "fixed nominal seed/model cohort; deterministic, not timestamped chronology; missing QC trajectories are not replaced",
+  "primary_inference": "Mann-Whitney comparison of within-seed IQR from one representative per trajectory; BH FDR within depth",
+  "overall_breadth_test": "Mann-Whitney on one median normalized intrachain-distance IQR per seed",
+  "sensitivity_tests": "trajectory-level Brown-Forsythe per distance, vanilla rarefaction to masked retained count, and 1000 random-seed saturation subsets per budget",
+  "separation": "Wasserstein distance between one representative per retained trajectory"
+}

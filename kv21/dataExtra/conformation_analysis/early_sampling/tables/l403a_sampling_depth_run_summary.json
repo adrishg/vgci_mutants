@@ -1,0 +1,13 @@
+{
+  "bootstrap_replicates": 1000,
+  "depths": [
+    250,
+    500,
+    1000,
+    2000,
+    "Full QC"
+  ],
+  "primary_depth": 1000,
+  "ordering": "seed/model/recycle; not timestamped chronology",
+  "experimental_like_definition": "lowest 5% pooled full-QC mean percentile error across kink, S6 rotation, I401 and I405 azimuth in B/D"
+}

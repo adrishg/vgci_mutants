@@ -19,3 +19,10 @@ tmp/
 *_preliminary_results.txt
 *checklist*.txt
 *FILTERING_STATUS.txt
+
+# Regenerable statistical caches and full distance-level exports
+notebooks/statistics/outputs/cache/
+notebooks/statistics/outputs/distance_distribution_statistics.csv
+
+# Large Kv2.1 conformational intermediates (regenerated locally by the analysis)
+kv21/dataExtra/kv21_l403a_conformational_metrics_*.csv

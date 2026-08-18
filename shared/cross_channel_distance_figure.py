@@ -128,7 +128,8 @@ def paper_configs(repo_root: str | Path):
             "references": ("8SD3:", "9O10:", "9O11:", "9O12:", "9O13:"),
         },
         "Nav1.5": {
-            "condition": "WT | mask v2",
+            "condition": "WT",
+            "protocol_note": "targeted mask v2",
             "vanilla": root / "nav15/dataDistances/26-07-27_Nav15_wt_vanillaAF2_distances_all_ok_rmsd_3A.csv",
             "masked": root / "nav15/dataDistances/26-07-27_Nav15_wt_maskedv2_AF2_distances_all_ok_rmsd_3A.csv",
             "colors": (NAV15_PALETTE["WT_VAN"], NAV15_PALETTE["WT_HM"]),
@@ -251,8 +252,8 @@ def draw_distance_panel(
         style = _reference_style(structure, reference_prefixes)
         position = list(aliases).index(row["Alias"])
         axis.scatter(
-            position, row["Distance"], s=24, marker=style["marker"],
-            facecolors="white", edgecolors=style["color"], linewidths=0.8,
+            position, row["Distance"], s=131, marker=style["marker"],
+            facecolors="white", edgecolors=style["color"], linewidths=1.5,
             zorder=8, label=structure if structure not in seen else None,
         )
         seen.add(structure)
@@ -262,7 +263,7 @@ def draw_distance_panel(
             format_channel_title(
                 f"{channel} | {condition}\n{REGION_LABELS[region]}"
             ),
-            fontsize=38, fontweight="semibold", pad=18,
+            fontsize=38, fontweight="semibold", pad=8,
         )
     axis.set_xlabel("")
     axis.set_ylabel(
@@ -298,9 +299,9 @@ def _legend_handles(channel, config, references):
     for structure in structures:
         style = _reference_style(structure, config["references"])
         experimental.append(Line2D(
-            [], [], linestyle="", marker=style["marker"], markersize=5.4,
+            [], [], linestyle="", marker=style["marker"], markersize=12.3,
             markerfacecolor="white", markeredgecolor=style["color"],
-            markeredgewidth=0.9, label=structure,
+            markeredgewidth=1.5, label=structure,
         ))
     return protocol + experimental
 
@@ -395,36 +396,48 @@ def make_grid(
         for structure in structures:
             style = _reference_style(structure, configs[channel]["references"])
             experimental_handles.append(Line2D(
-                [], [], linestyle="", marker=style["marker"], markersize=5.5,
+                [], [], linestyle="", marker=style["marker"], markersize=12.75,
                 markerfacecolor="white", markeredgecolor=style["color"],
-                markeredgewidth=1.0,
+                markeredgewidth=1.5,
                 label=(
                     f"{format_channel_title(channel)} | "
                     f"{str(structure).split(':', 1)[0]}"
                 ),
             ))
 
+    # Keep each channel visually self-contained. Matplotlib fills multi-column
+    # legends down each column, so three invisible entries reserve column 3 as
+    # a spacer: Kv2.1 occupies columns 1–2, Nav1.5 column 4, and Cav1.2 column 5.
+    spacer = Line2D([], [], linestyle="", marker="", alpha=0, label="")
+    experimental_handles = (
+        experimental_handles[:5]
+        + [spacer]
+        + [spacer, spacer, spacer]
+        + experimental_handles[5:8]
+        + experimental_handles[8:11]
+    )
+
     legend_axis.text(
-        0.5, 1.12, "Residue-pair landmark",
-        transform=legend_axis.transAxes, ha="center", va="bottom",
+        0.5, 0.98, "Residue-pair landmark",
+        transform=legend_axis.transAxes, ha="center", va="top",
         fontsize=48, fontweight="medium",
     )
     ensemble_legend = legend_axis.legend(
         handles=ensemble_handles,
-        loc="upper center", bbox_to_anchor=(0.5, 0.94),
+        loc="upper center", bbox_to_anchor=(0.5, 0.78),
         ncol=3, fontsize=30.0, frameon=True,
         columnspacing=1.35, handletextpad=0.65,
     )
     legend_axis.add_artist(ensemble_legend)
     legend_axis.legend(
         handles=experimental_handles,
-        loc="lower center", bbox_to_anchor=(0.5, -0.10),
-        ncol=4, fontsize=28.0, frameon=True,
+        loc="lower center", bbox_to_anchor=(0.5, -0.04),
+        ncol=5, fontsize=28.0, frameon=True,
         columnspacing=1.25, handletextpad=0.6,
     )
     figure.subplots_adjust(
-        left=0.055, right=0.99, top=0.98, bottom=0.035,
-        hspace=1.12, wspace=0.27,
+        left=0.050, right=0.992, top=0.985, bottom=0.03,
+        hspace=0.70, wspace=0.06,
     )
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)

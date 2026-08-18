@@ -14,18 +14,21 @@ import seaborn as sns
 from shared.experimental_overlays import experimental_rows
 from shared.plotting import (
     ACCENT_PALETTE,
+    add_s6_cross_pore_columns,
     experimental_reference_style,
     format_channel_title,
 )
 
 
-SUBSETS = ("Complete final QC", "100 retained trajectories")
+EARLY_SUBSET = "QC survivors from nominal first 100"
+SUBSETS = ("Complete final QC", EARLY_SUBSET)
 SUBSET_COLORS = {
     "Complete final QC": ACCENT_PALETTE["PINK"],
-    "100 retained trajectories": ACCENT_PALETTE["CORAL"],
+    EARLY_SUBSET: ACCENT_PALETTE["CORAL"],
 }
 _SEED = re.compile(r"_seed_(\d+)", re.I)
 _MODEL = re.compile(r"_model_(\d+)", re.I)
+_RECYCLE = re.compile(r"\.r(\d+)\.pdb$", re.I)
 
 
 def _trajectory_keys(frame: pd.DataFrame) -> pd.DataFrame:
@@ -60,16 +63,79 @@ def first_retained_trajectories(
     return frame.loc[selected_index].copy()
 
 
+def first_nominal_trajectory_cohort(
+    frame: pd.DataFrame, number_seeds: int = 20
+) -> pd.DataFrame:
+    """Select QC survivors from the first N ordered seed cohorts.
+
+    With five AlphaFold model trajectories per seed, 20 seeds define the
+    nominal first 100 generated trajectories before QC attrition.
+    """
+    keys = _trajectory_keys(frame)
+    if keys.isna().any(axis=None):
+        bad = frame.loc[keys.isna().any(axis=1), "pdb_file"].head().tolist()
+        raise ValueError(f"Could not parse trajectory identity: {bad}")
+    seeds = keys["seed"].drop_duplicates().sort_values().head(number_seeds)
+    return frame.loc[keys["seed"].isin(seeds)].copy()
+
+
+def latest_qc_trajectory_representatives(frame: pd.DataFrame) -> pd.DataFrame:
+    """Select the latest final-QC recycle for each seed/model trajectory."""
+    keys = _trajectory_keys(frame)
+    recycle = pd.to_numeric(
+        frame["pdb_file"].astype(str).str.extract(_RECYCLE, expand=False),
+        errors="coerce",
+    )
+    if keys.isna().any(axis=None) or recycle.isna().any():
+        bad = frame.loc[keys.isna().any(axis=1) | recycle.isna(), "pdb_file"].head().tolist()
+        raise ValueError(f"Could not parse trajectory/recycle identity: {bad}")
+    order = keys.assign(recycle=recycle, _row_index=frame.index)
+    selected = (
+        order.sort_values(["seed", "model", "recycle", "_row_index"])
+        .groupby(["seed", "model"], sort=False)
+        .tail(1)["_row_index"]
+    )
+    return frame.loc[selected].copy()
+
+
+def _kv21_ranked_ring_columns(
+    frame: pd.DataFrame, residue_name: str = "GLY", residue_number: int = 377
+) -> tuple[pd.DataFrame, dict[str, str]]:
+    """Add chain-label-invariant sorted distances for a homotetrameric ring."""
+    result = frame.copy()
+    pairs = ("A-B", "A-C", "A-D", "B-C", "B-D", "C-D")
+    columns = [
+        f"CA_CA_{pair[0]}_{residue_name}{residue_number}_CA-{pair[2]}_{residue_name}{residue_number}_CA"
+        for pair in pairs
+    ]
+    missing = [column for column in columns if column not in result]
+    if missing:
+        raise KeyError(f"Missing Kv2.1 ring columns: {missing}")
+    ranked = np.sort(result[columns].apply(pd.to_numeric, errors="coerce").to_numpy(), axis=1)
+    aliases = {}
+    for rank in range(6):
+        output = f"Kv21_SF_ring_rank_{rank + 1}"
+        result[output] = ranked[:, rank]
+        aliases[f"G375 ring rank {rank + 1}"] = output
+    return result, aliases
+
+
 def load_final_qc_pair(paths: Mapping[str, Path]) -> dict[str, dict[str, pd.DataFrame]]:
-    full = {
+    raw = {
         protocol: pd.read_csv(path)
         for protocol, path in paths.items()
     }
+    full = {
+        protocol: latest_qc_trajectory_representatives(frame)
+        for protocol, frame in raw.items()
+    }
     return {
         "Complete final QC": full,
-        "100 retained trajectories": {
-            protocol: first_retained_trajectories(frame)
-            for protocol, frame in full.items()
+        EARLY_SUBSET: {
+            protocol: latest_qc_trajectory_representatives(
+                first_nominal_trajectory_cohort(frame)
+            )
+            for protocol, frame in raw.items()
         },
     }
 
@@ -124,7 +190,22 @@ def plot_sampling_depth_condition(
     protocol_colors: Mapping[str, str],
     top_n: int = 8,
 ):
-    """Plot full final-QC and 100-trajectory protocol comparisons."""
+    """Plot full final-QC and fixed nominal first-100 cohort comparisons."""
+    # Kv2.1 is homotetrameric, so raw A-B/A-C labels are not stable identities
+    # when masking changes subunit ordering. Replace those panels with
+    # chain-label-invariant summaries before ranking or plotting.
+    if channel == "Kv2.1" and region in {"selectivity_filter", "intracellular_gate"}:
+        prepared = {subset: {} for subset in SUBSETS}
+        invariant_aliases = None
+        for subset in SUBSETS:
+            for protocol in ("vanilla", "masked"):
+                if region == "selectivity_filter":
+                    prepared[subset][protocol], current = _kv21_ranked_ring_columns(frames[subset][protocol])
+                else:
+                    prepared[subset][protocol], current = add_s6_cross_pore_columns(frames[subset][protocol])
+                invariant_aliases = current
+        frames = prepared
+        aliases = invariant_aliases
     ranking = rank_variability(frames, aliases.values())
     if ranking.empty:
         return ranking, None

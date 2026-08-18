@@ -226,7 +226,7 @@ def plot_missing_af2_panel(
         axis.scatter(
             values["IFM1"], values["IFM2"],
             marker=style["marker"], s=110,
-            color=style["color"], edgecolor="white", linewidth=0.7,
+            facecolor="white", edgecolor=style["color"], linewidth=1.2,
         )
         axis.annotate(
             pdb_id, (values["IFM1"], values["IFM2"]),

@@ -1,0 +1,12 @@
+{
+  "chain_rows": 143984,
+  "prediction_structures": 35994,
+  "selected_prediction_structures": 24269,
+  "seeds_per_condition_protocol": 100,
+  "bootstrap_replicates": 2000,
+  "primary_selection": "all_ok_rmsd_3A_structural_interface_alignment_qc",
+  "pairing": "protocol-specific seed summaries; all model/recycle observations retained within seed",
+  "vanilla_exact_row_matches": 22320,
+  "masked_exact_row_matches": 24000,
+  "dssp": "unavailable; no DSSP claims made"
+}
