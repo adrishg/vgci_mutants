@@ -6,14 +6,14 @@ root=Path(__file__).resolve().parents[1]; path=root/'kv21'/'Kv21_L403A_all_dista
 nb=nbf.v4.new_notebook(); c=[]
 c.append(nbf.v4.new_markdown_cell("""# Kv2.1 L403A: all-distance sampling breadth at equal depth
 
-This notebook expands the S6-focused sampling analysis to every exact shared numerical distance in the established `all_ok_rmsd_3A_structural_interface_alignment_qc` vanilla and masked L403A tables: 705 Cα distances and 705 shortest-heavy-atom distances.
+This notebook expands the S6-focused sampling analysis to the 546 chain-label-safe intrachain distances shared by the established `all_ok_rmsd_3A_structural_interface_alignment_qc` L403A ensembles: 273 Cα distances and 273 shortest non-hydrogen distances. Raw interchain distances are excluded because Kv2.1 homotetramer chain labels can permute.
 
-It asks whether masking broadens the complete precomputed distance ensemble, whether that effect is already visible in the first 1,000 retained structures, and how closely early results reproduce complete-QC results."""))
+It asks whether targeted MSA masking broadens the structural ensemble, whether that effect is detectable in the fixed First100 cohort (20 random seeds × five AlphaFold2 model parameterizations), and how closely First100 results reproduce the complete 100-seed ensemble."""))
 c.append(nbf.v4.new_markdown_cell("""## Statistical design
 
-Rows are ordered deterministically by seed, model number, and recycle; this is an indexed equal-depth analysis, not timestamped wall-clock chronology. Global IQR ratios describe the complete distributions. For inference, an IQR is calculated within each seed for every distance, making seed—not recycle snapshot—the statistical unit. Vanilla and masked seed-IQR distributions are compared with two-sided Mann–Whitney tests followed by Benjamini–Hochberg FDR correction within each sampling depth. Distributional separation is additionally summarized by Wasserstein distance between trajectory medians.
+The principal design varies MSA treatment: the default workflow (vanilla) versus targeted MSA masking. Rows are ordered deterministically by random seed, AlphaFold2 model parameterization, and numbered recycle snapshot; this is an indexed sampling-depth analysis, not timestamped wall-clock chronology. Global IQR ratios describe the complete distributions. For inference, an IQR is calculated within each seed for every distance, making seed—not recycle snapshot—the statistical unit. Vanilla and targeted-masking seed-IQR distributions are compared with two-sided Mann–Whitney tests followed by Benjamini–Hochberg FDR correction within each sampling depth. Distributional separation is additionally summarized by Wasserstein distance between model–seed trajectory medians.
 
-Positive log2 ratios mean broader masked sampling; negative values mean broader vanilla sampling. Breadth is not equivalent to accuracy or experimental relevance."""))
+Positive log2 ratios indicate greater ensemble breadth after targeted masking; negative values indicate greater breadth in vanilla predictions. Ensemble breadth is not equivalent to accuracy or experimental relevance."""))
 c.append(nbf.v4.new_code_cell("""from pathlib import Path
 import sys, json
 import pandas as pd
@@ -26,9 +26,9 @@ result=run(); print(json.dumps(result['audit'],indent=2))"""))
 c.append(nbf.v4.new_markdown_cell("## Ensemble-wide summary across sampling depths"))
 c.append(nbf.v4.new_code_cell("display(pd.read_csv(TAB/'l403a_first100_seed_level_global_breadth_summary.csv'))"))
 c.append(nbf.v4.new_code_cell("display(pd.read_csv(TAB/'l403a_all_distance_sampling_summary.csv')); display(Image(filename=str(FIG/'all_distance_breadth_fraction_by_depth.png')))"))
-c.append(nbf.v4.new_markdown_cell("## First 1,000 versus full QC"))
-c.append(nbf.v4.new_code_cell("display(pd.read_csv(TAB/'l403a_all_distance_sampling_stability.csv')); display(Image(filename=str(FIG/'first1000_vs_full_distance_breadth.png')))"))
-c.append(nbf.v4.new_markdown_cell("## Distribution of breadth effects across all 1,410 distances"))
+c.append(nbf.v4.new_markdown_cell("## First100 cohort versus complete 100-seed ensemble"))
+c.append(nbf.v4.new_code_cell("display(pd.read_csv(TAB/'l403a_all_distance_sampling_stability.csv')); display(Image(filename=str(FIG/'first100_nominal_vs_full_distance_breadth.png')))"))
+c.append(nbf.v4.new_markdown_cell("## Distribution of breadth effects across the 546 chain-label-safe intrachain distances"))
 c.append(nbf.v4.new_code_cell("display(Image(filename=str(FIG/'all_distance_iqr_ratio_distributions.png')))"))
 c.append(nbf.v4.new_markdown_cell("## Strongest concordant broadened and narrowed distances"))
 c.append(nbf.v4.new_code_cell("display(pd.read_csv(TAB/'top_concordant_distance_breadth_changes.csv')); display(Image(filename=str(FIG/'top_all_distance_breadth_heatmap.png')))"))
@@ -38,12 +38,22 @@ display(stats[stats.depth.astype(str).isin(['1000','Full QC'])])
 print(f'{len(stats):,} distance-by-depth rows')"""))
 c.append(nbf.v4.new_markdown_cell("""## Figure S8 assembly: fixed-budget sampling breadth
 
-This cell assembles the four selected, analysis-generated panels into one editable Figure S8 layout. The source panels are not screenshots from an external document: each is generated above by `run()` from the saved analysis tables. The unequal layout preserves their native aspect ratios so the 546-distance evidence stripe remains legible.
+This cell assembles the four selected, analysis-generated panels into one editable Figure S8 layout. Each source panel is generated above by `run()` from the saved analysis tables.
 
 - **A:** First100 seed-level breadth, distance-wise breadth, directional test, and retention.
-- **B:** Ordered effects and directional BH-significance across all 546 distances.
+- **B:** Effect magnitude and directional BH evidence across the complete structural-distance panel; every point is one distance.
 - **C:** Random-seed saturation from 1,000 subsets per seed budget.
 - **D:** First100-versus-full directional-broadening concordance.
+"""))
+c.append(nbf.v4.new_code_cell("""s8_provenance = pd.DataFrame([
+    {'panel':'A', 'source function':'figures(...)', 'source data':'overall_seed_breadth + first100_seed_block_distribution_statistics + nominal_trajectory_retention_audit', 'key parameters':'First100 cohort; 20 seeds × 5 model parameterizations; one final retained structure per model–seed trajectory'},
+    {'panel':'B', 'source function':'figures(...) evidence scatter', 'source data':'l403a_first100_seed_block_distribution_statistics.csv', 'key parameters':'targeted-masking/vanilla IQR ratio; one-sided seed-block permutation; BH q < 0.05'},
+    {'panel':'C', 'source function':'random_seed_saturation(...) → figures(...)', 'source data':'l403a_random_seed_saturation_summary.csv', 'key parameters':'5, 10, 20, 25, 50, 75, 100 seeds; 1,000 random subsets/depth; one final retained structure/model–seed trajectory'},
+    {'panel':'D', 'source function':'figures(...) concordance matrix', 'source data':'l403a_first100_vs_full_broadening_concordance.csv', 'key parameters':'directional broader = positive IQR effect and one-sided seed-block BH q < 0.05'},
+])
+display(s8_provenance)
+print('Analysis entry point: kv21.run_l403a_all_distance_sampling_analysis.run()')
+print('Figure-generation function: kv21.run_l403a_all_distance_sampling_analysis.figures(...)')
 """))
 c.append(nbf.v4.new_code_cell("""from PIL import Image as PILImage, ImageChops
 import matplotlib.pyplot as plt
@@ -65,15 +75,13 @@ def trim_white_margin(path, tolerance=8):
 
 panels = {label: trim_white_margin(path) for label, path in panel_paths.items()}
 
-fig = plt.figure(figsize=(22, 12.5), facecolor='white')
-outer = fig.add_gridspec(2, 1, height_ratios=[1.80, 1.00], hspace=.025)
-top = outer[0].subgridspec(1, 2, width_ratios=[1, 1], wspace=.025)
-bottom = outer[1].subgridspec(1, 2, width_ratios=[3.35, 1.15], wspace=.035)
+fig = plt.figure(figsize=(22, 17), facecolor='white')
+outer = fig.add_gridspec(2, 2, height_ratios=[1, 1], width_ratios=[1, 1], hspace=.035, wspace=.025)
 axes = {
-    'A': fig.add_subplot(top[0, 0]),
-    'C': fig.add_subplot(top[0, 1]),
-    'B': fig.add_subplot(bottom[0, 0]),
-    'D': fig.add_subplot(bottom[0, 1]),
+    'A': fig.add_subplot(outer[0, 0]),
+    'C': fig.add_subplot(outer[0, 1]),
+    'B': fig.add_subplot(outer[1, 0]),
+    'D': fig.add_subplot(outer[1, 1]),
 }
 
 for label, axis in axes.items():
@@ -105,10 +113,10 @@ display(pd.read_csv(revision_tables/'kv21_rmsf_trajectory_block_bootstrap.csv'))
 display(pd.read_csv(revision_tables/'kv21_sampling_breadth_manuscript_statistics.csv'))"""))
 c.append(nbf.v4.new_markdown_cell("""## Reading guide
 
-- `global_IQR_ratio > 1` means the masked raw ensemble is broader for that distance.
-- `seed_IQR_ratio > 1` means the typical within-seed masked ensemble is broader.
-- `seed_breadth_q < 0.05` identifies FDR-significant protocol differences using seeds as replicates.
-- `trajectory_median_W1_A` describes protocol separation after giving each seed/model trajectory one median observation.
-- Agreement between first 1,000 and full QC supports sampling-efficiency claims; it does not convert deterministic seed order into chronological time.
+- `global_IQR_ratio > 1` means the targeted-masking ensemble is broader than the vanilla ensemble for that distance.
+- `seed_IQR_ratio > 1` means the typical within-seed targeted-masking ensemble is broader.
+- `seed_breadth_q < 0.05` identifies FDR-significant MSA-treatment differences using seeds as replicates.
+- `trajectory_median_W1_A` describes MSA-treatment separation after giving each model–seed trajectory one median observation.
+- Agreement between the First100 cohort and complete 100-seed ensemble supports reduced-sampling-depth claims; deterministic seed order is not chronological time.
 - These all-distance results establish breadth, not whether broader states are experimentally correct."""))
 nb['cells']=c; nb['metadata']={'kernelspec':{'display_name':'Python 3','language':'python','name':'python3'},'language_info':{'name':'python','version':'3'}}; nbf.write(nb,path); print(path)

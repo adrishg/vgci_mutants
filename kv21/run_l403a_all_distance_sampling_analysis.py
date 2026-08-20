@@ -364,17 +364,17 @@ def savefig(fig,name):
 def figures(results,summary,stable,frames,trajectory_audit,seed_breadth,rarefaction,saturation,distribution_stats,full_distribution_stats):
     apply_kv21_style(); early=results[results.depth.astype(str)==str(FOCAL_DEPTH)]; full=results[results.depth.astype(str)=='Full QC']
     fig,axs=plt.subplots(1,2,figsize=(12,4.8))
-    for ax,g,title in [(axs[0],early,'Nominal first 100 (20 seeds × 5 models)'),(axs[1],full,'Full QC')]:
+    for ax,g,title in [(axs[0],early,'First100 cohort (20 seeds)'),(axs[1],full,'Complete 100-seed ensemble')]:
         sns.histplot(g.global_log2_IQR_ratio,bins=55,color=KV21_PALETTE['L403A_HM'],stat='density',alpha=.65,ax=ax)
-        ax.axvline(0,color='.25',lw=1); ax.axvline(g.global_log2_IQR_ratio.median(),color=KV21_PALETTE['L403A_HM'],ls='--'); ax.set_title(title); ax.set_xlabel('log2 masked/vanilla global IQR')
-    axs[0].set_ylabel(f'Density across {len(early):,} intrachain distances'); fig.suptitle('Chain-label-safe intrachain L403A ensemble breadth'); fig.tight_layout(); savefig(fig,'all_distance_iqr_ratio_distributions')
+        ax.axvline(0,color='.25',lw=1,label='Equal breadth'); ax.axvline(g.global_log2_IQR_ratio.median(),color=KV21_PALETTE['L403A_HM'],ls='--',label='Median across distances'); ax.set_title(title); ax.set_xlabel('Relative ensemble breadth: targeted masking ÷ vanilla IQR (log₂ scale)'); ax.legend(frameon=False,fontsize=8)
+    axs[0].set_ylabel('Structural distances'); fig.suptitle('L403A structural breadth across the full distance panel'); fig.tight_layout(); savefig(fig,'all_distance_iqr_ratio_distributions')
     z=early[['distance','global_log2_IQR_ratio']].merge(full[['distance','global_log2_IQR_ratio']],on='distance',suffixes=('_first20seeds','_full'))
-    fig,ax=plt.subplots(figsize=(6.5,6)); ax.scatter(z.global_log2_IQR_ratio_first20seeds,z.global_log2_IQR_ratio_full,s=8,alpha=.3,color=KV21_PALETTE['L403A_HM']); lim=np.nanmax(np.abs(z.filter(like='ratio').to_numpy())); ax.plot([-lim,lim],[-lim,lim],color='.3',lw=.8); ax.axhline(0,color='.7',lw=.6); ax.axvline(0,color='.7',lw=.6); ax.set(xlabel='Nominal first 100 (20 seeds) log2 IQR ratio',ylabel='Full-QC log2 IQR ratio',title='Does the fixed early cohort reproduce full QC?'); fig.tight_layout(); savefig(fig,'first100_nominal_vs_full_distance_breadth')
+    fig,ax=plt.subplots(figsize=(6.5,6)); ax.scatter(z.global_log2_IQR_ratio_first20seeds,z.global_log2_IQR_ratio_full,s=8,alpha=.3,color=KV21_PALETTE['L403A_HM'],label='One point per structural distance'); lim=np.nanmax(np.abs(z.filter(like='ratio').to_numpy())); ax.plot([-lim,lim],[-lim,lim],color='.3',lw=.8,label='Same effect at both sampling depths'); ax.axhline(0,color='.7',lw=.6); ax.axvline(0,color='.7',lw=.6); ax.set(xlabel='First100 cohort: log₂(targeted masking/vanilla IQR)',ylabel='Complete ensemble: log₂(targeted masking/vanilla IQR)',title='Do First100 breadth effects persist at complete sampling depth?'); ax.legend(frameon=False,fontsize=8); fig.tight_layout(); savefig(fig,'first100_nominal_vs_full_distance_breadth')
     # Top reproducible broadened/narrowed distances ranked by the weaker absolute effect.
     z['concordant']=np.sign(z.global_log2_IQR_ratio_first20seeds)==np.sign(z.global_log2_IQR_ratio_full)
     z['min_abs']=np.minimum(abs(z.global_log2_IQR_ratio_first20seeds),abs(z.global_log2_IQR_ratio_full))
     broad=z[z.concordant&(z.global_log2_IQR_ratio_full>0)].nlargest(15,'min_abs'); narrow=z[z.concordant&(z.global_log2_IQR_ratio_full<0)].nlargest(15,'min_abs'); top=pd.concat([broad,narrow]).set_index('distance')
-    heat=top[['global_log2_IQR_ratio_first20seeds','global_log2_IQR_ratio_full']]; lim=np.nanmax(abs(heat.to_numpy())); fig,ax=plt.subplots(figsize=(8,12)); sns.heatmap(heat,cmap=sns.diverging_palette(18,135,as_cmap=True),center=0,vmin=-lim,vmax=lim,annot=True,fmt='.2f',ax=ax,cbar_kws={'label':'log2 masked/vanilla IQR'}); ax.set_xticklabels(['Nominal first 100','Full QC'],rotation=0); ax.set_ylabel(''); ax.set_title('Largest concordant all-distance breadth changes'); fig.tight_layout(); savefig(fig,'top_all_distance_breadth_heatmap')
+    heat=top[['global_log2_IQR_ratio_first20seeds','global_log2_IQR_ratio_full']]; lim=np.nanmax(abs(heat.to_numpy())); fig,ax=plt.subplots(figsize=(8,12)); sns.heatmap(heat,cmap=sns.diverging_palette(18,135,as_cmap=True),center=0,vmin=-lim,vmax=lim,annot=True,fmt='.2f',ax=ax,cbar_kws={'label':'log₂(targeted masking/vanilla IQR)\nGreen: broader after masking; red: broader in vanilla'}); ax.set_xticklabels(['First100 cohort','Complete ensemble'],rotation=0); ax.set_ylabel(''); ax.set_title('Structural distances with the largest consistent breadth differences'); fig.tight_layout(); savefig(fig,'top_all_distance_breadth_heatmap')
     top.reset_index().to_csv(TAB/'top_concordant_distance_breadth_changes.csv',index=False)
     # Representative raw distributions: two strongest broadened contacts and
     # one strongest narrowed contact, using one median per trajectory.
@@ -393,44 +393,67 @@ def figures(results,summary,stable,frames,trajectory_audit,seed_breadth,rarefact
                 palette=[KV21_PALETTE['L403A_VAN'],KV21_PALETTE['L403A_HM']],inner='quart',cut=0,linewidth=.7,ax=ax)
             ax.set_title(distance.replace('CA_CA_','').replace('_CA','') if row==0 else '')
             ax.set_xlabel('' if row==0 else str(depth)); ax.set_ylabel('Distance (Å)' if col==0 else '')
-    fig.suptitle('Chain-label-safe intrachain distance examples\none final-QC representative per trajectory; upper: nominal first 100, lower: full QC',y=1.02)
+            ax.set_xticklabels(['Vanilla','Targeted masking'])
+    fig.suptitle('Example intrachain-distance distributions\nLight green: vanilla; dark green: targeted masking. Top: First100 cohort; bottom: complete ensemble',y=1.02)
     fig.tight_layout(); savefig(fig,'representative_all_distance_distributions')
-    order=[4,8,12,16,20,'Full QC']; labels=['20','40','60','80','100','Full QC\n(500 nominal)']; s=summary.set_index('depth').reindex(order); fig,ax=plt.subplots(figsize=(8.5,4.8)); ax.plot(range(6),s.fraction_global_broader_masked,marker='o',color=KV21_PALETTE['L403A_HM'],label='Global IQR broader'); ax.plot(range(6),s.fraction_significant_broader_masked,marker='o',color=KV21_PALETTE['L403A_VAN'],label='Seed breadth broader, q<0.05'); ax.plot(range(6),s.fraction_significant_narrower_masked,marker='o',color=KV21_PALETTE['WT_HM'],label='Seed breadth narrower, q<0.05'); ax.set_xticks(range(6),labels); ax.set_ylabel(f'Fraction of {len(results.distance.unique()):,} intrachain distances'); ax.set_xlabel('Nominal generated-trajectory budget'); ax.set_title('How widespread is chain-label-safe masked broadening?'); ax.legend(); fig.tight_layout(); savefig(fig,'all_distance_breadth_fraction_by_depth')
-    # QC survival within the fixed nominal first-100 cohort. Cell annotations
-    # are the number of retained model/recycle rows; zero denotes exclusion.
-    fig,axs=plt.subplots(1,2,figsize=(9,10),sharex=True)
-    for ax,protocol,color in zip(axs,['vanilla','masked'],[KV21_PALETTE['L403A_VAN'],KV21_PALETTE['L403A_HM']]):
-        z=trajectory_audit[trajectory_audit.protocol==protocol]
-        matrix=z.pivot(index='seed',columns='model_number',values='final_qc_rows')
-        sns.heatmap(matrix,cmap=sns.light_palette(color,as_cmap=True),annot=True,fmt='g',cbar=False,
-            linewidths=.5,linecolor='white',vmin=0,vmax=matrix.to_numpy().max(),ax=ax)
-        retained=int(z.final_qc_retained.sum())
-        ax.set_title(f'{protocol.capitalize()}: {retained}/100 retained')
-        ax.set_xlabel('Model trajectory'); ax.set_ylabel('Seed' if protocol=='vanilla' else '')
-    fig.suptitle('Final-QC survival within nominal first 100 trajectories\n20 ordered seeds × 5 models; annotations = retained recycle rows',y=.995)
+    order=[4,8,12,16,20,'Full QC']; labels=['4','8','12','16','20','100\n(full dataset)']; s=summary.set_index('depth').reindex(order)
+    fig,ax=plt.subplots(figsize=(8.5,4.8))
+    ax.plot(range(6),s.fraction_global_broader_masked,marker='o',color=KV21_PALETTE['L403A_HM'],label='Broader after targeted masking')
+    ax.plot(range(6),s.fraction_significant_broader_masked,marker='o',color=KV21_PALETTE['L403A_VAN'],label='Significantly broader after targeted masking')
+    ax.plot(range(6),s.fraction_significant_narrower_masked,marker='o',color=KV21_PALETTE['WT_HM'],label='Significantly broader in vanilla')
+    ax.set_xticks(range(6),labels)
+    ax.set_ylabel('Share of structural distances')
+    ax.set_xlabel('Seeds sampled per protocol')
+    ax.set_title('How often does targeted masking broaden the structural ensemble?')
+    ax.text(.02,.03,'Five AlphaFold2 model parameterizations per seed; one final-QC representative per retained model–seed trajectory',
+            transform=ax.transAxes,fontsize=8.5,color='.35')
+    ax.legend(frameon=False); fig.tight_layout(); savefig(fig,'all_distance_breadth_fraction_by_depth')
+    # Recycle-centered QC view. Each cell counts distinct seed/model
+    # trajectories represented at that recycle in the fixed first-20-seed
+    # cohort. This answers when trajectories survive, rather than whether a
+    # particular AlphaFold model index happens to survive more often.
+    recycle_rows=[]
+    for protocol in ['vanilla','masked']:
+        selected=subset(frames[protocol],FOCAL_DEPTH).copy()
+        selected['recycle_number']=pd.to_numeric(selected.recycle_number,errors='coerce')
+        counts=(selected.dropna(subset=['recycle_number'])
+            .groupby('recycle_number')[['seed','model_number']]
+            .apply(lambda g:g.drop_duplicates().shape[0]))
+        display_name='Vanilla' if protocol=='vanilla' else 'Targeted masking'
+        recycle_rows.append(pd.Series({r:int(counts.get(r,0)) for r in range(1,11)},name=display_name))
+    recycle_matrix=pd.DataFrame(recycle_rows)
+    fig,ax=plt.subplots(figsize=(11,3.5))
+    sns.heatmap(recycle_matrix,cmap=sns.light_palette(KV21_PALETTE['L403A_HM'],as_cmap=True),
+        vmin=0,vmax=100,annot=True,fmt='d',linewidths=1,linecolor='white',
+        cbar=False,
+        annot_kws={'fontsize':12,'fontweight':'bold'},ax=ax)
+    ax.set_xlabel('Numbered recycle snapshot'); ax.set_ylabel('MSA treatment')
+    ax.set_title('Final-QC retention across recycle snapshots in the First100 cohort\nEach cell = retained model–seed trajectories out of 100 attempted (20 seeds × 5 model parameterizations)')
+    ax.tick_params(axis='x',rotation=0); ax.tick_params(axis='y',rotation=0)
     fig.tight_layout(); savefig(fig,'first100_nominal_trajectory_qc_audit')
     # Overall cluster-aware breadth and retained-count-matched sensitivity.
-    fig,axs=plt.subplots(1,2,figsize=(12,5))
+    fig,axs=plt.subplots(1,2,figsize=(15,5.5))
     sns.violinplot(data=seed_breadth,x='protocol',y='median_normalized_seed_IQR',order=['vanilla','masked'],
         hue='protocol',palette={'vanilla':KV21_PALETTE['L403A_VAN'],'masked':KV21_PALETTE['L403A_HM']},
         legend=False,inner=None,cut=0,ax=axs[0])
     sns.stripplot(data=seed_breadth,x='protocol',y='median_normalized_seed_IQR',order=['vanilla','masked'],
         color='.2',size=4,alpha=.7,ax=axs[0])
-    axs[0].set(xlabel='',ylabel='Median normalized within-seed IQR',title='One breadth value per seed (20 vs 20)')
+    axs[0].set(xlabel='',ylabel='Relative structural breadth per seed',title='One global breadth value per seed')
+    axs[0].set_xticklabels(['Vanilla','Targeted masking'])
     sns.histplot(rarefaction.median_IQR_ratio_masked_over_vanilla,bins=35,
         color=KV21_PALETTE['L403A_HM'],ax=axs[1])
     axs[1].axvline(1,color='.25',ls='--',lw=1); axs[1].set(
-        xlabel='Median masked/vanilla IQR ratio',ylabel='Rarefaction draws',
+        xlabel='Relative breadth after matching retained counts (targeted masking ÷ vanilla)',ylabel='Random matched-count comparisons',
         title='Equal retained count: 85 vs 85 trajectories')
-    fig.suptitle('Does masking yield more distance breadth within the same nominal first-100 budget?')
+    fig.suptitle('Does masking yield more structural breadth from the same 20-seed budget?')
     fig.tight_layout(); savefig(fig,'first100_bang_for_buck_breadth_statistics')
     # Random-seed saturation: typical performance at a fixed input-seed budget.
     fig,axs=plt.subplots(2,2,figsize=(12,9),sharex=True)
     x=saturation.seeds_sampled.to_numpy(float)
-    for protocol,color,label in [('vanilla',KV21_PALETTE['L403A_VAN'],'Vanilla'),('masked',KV21_PALETTE['L403A_HM'],'Masked')]:
+    for protocol,color,label in [('vanilla',KV21_PALETTE['L403A_VAN'],'Vanilla'),('masked',KV21_PALETTE['L403A_HM'],'Targeted masking')]:
         for ax,metric,ylabel in [(axs[0,0],'retention_fraction','Final-QC retention fraction'),
-                                 (axs[0,1],'normalized_breadth','Median normalized intrachain IQR'),
-                                 (axs[1,0],'fraction_full_breadth','Fraction of protocol full-QC breadth')]:
+                                 (axs[0,1],'normalized_breadth','Relative structural breadth'),
+                                 (axs[1,0],'fraction_full_breadth','Share of each protocol’s full-data breadth')]:
             y=saturation[f'{protocol}_{metric}_median'].to_numpy(float)
             lo=saturation[f'{protocol}_{metric}_CI_low'].to_numpy(float); hi=saturation[f'{protocol}_{metric}_CI_high'].to_numpy(float)
             ax.plot(x,y,marker='o',color=color,label=label); ax.fill_between(x,lo,hi,color=color,alpha=.18)
@@ -438,28 +461,29 @@ def figures(results,summary,stable,frames,trajectory_audit,seed_breadth,rarefact
     gain=saturation.breadth_gain_masked_over_vanilla_median.to_numpy(float)
     lo=saturation.breadth_gain_masked_over_vanilla_CI_low.to_numpy(float); hi=saturation.breadth_gain_masked_over_vanilla_CI_high.to_numpy(float)
     axs[1,1].plot(x,gain,marker='o',color=KV21_PALETTE['L403A_HM']); axs[1,1].fill_between(x,lo,hi,color=KV21_PALETTE['L403A_HM'],alpha=.18)
-    axs[1,1].axhline(1,color='.3',ls='--',lw=1); axs[1,1].set_ylabel('Masked/vanilla breadth gain')
+    axs[1,1].axhline(1,color='.3',ls='--',lw=1,label='Equal breadth'); axs[1,1].set_ylabel('Relative breadth (targeted masking ÷ vanilla)'); axs[1,1].legend(frameon=False,fontsize=8)
     for ax in axs[1]: ax.set_xlabel('Randomly sampled input seeds')
     for ax in axs.flat: ax.set_xticks([5,10,20,25,50,75,100]); sns.despine(ax=ax)
-    axs[0,0].legend(); fig.suptitle('L403A sampling efficiency and saturation\n1,000 random seed subsets per budget; one final-QC representative per retained trajectory')
+    axs[0,0].legend(title='MSA treatment',frameon=False); fig.suptitle('L403A sampling-depth analysis\nPoints: median across 1,000 random seed subsets; shaded bands: 2.5th–97.5th percentiles')
     fig.tight_layout(); savefig(fig,'random_seed_sampling_efficiency_saturation')
     plot=distribution_stats.copy(); sig=plot.q_W1_seed_block_BH<.05
-    plot['result']='Not significant'
-    plot.loc[sig&(plot.log2_IQR_ratio>0),'result']='Broader masked'
-    plot.loc[sig&(plot.log2_IQR_ratio<0),'result']='Narrower masked'
-    colors={'Not significant':'#B8B8B8','Broader masked':KV21_PALETTE['L403A_HM'],'Narrower masked':KV21_PALETTE['WT_HM']}
+    plot['result']='No significant difference'
+    plot.loc[sig&(plot.log2_IQR_ratio>0),'result']='Significantly broader after targeted masking'
+    plot.loc[sig&(plot.log2_IQR_ratio<0),'result']='Significantly broader in vanilla'
+    colors={'No significant difference':'#B8B8B8','Significantly broader after targeted masking':KV21_PALETTE['L403A_HM'],'Significantly broader in vanilla':KV21_PALETTE['WT_HM']}
     fig,axs=plt.subplots(1,2,figsize=(12,5))
-    for category in ['Not significant','Narrower masked','Broader masked']:
+    for category in ['No significant difference','Significantly broader in vanilla','Significantly broader after targeted masking']:
         z=plot[plot.result==category]
         axs[0].scatter(z.log2_IQR_ratio,-np.log10(z.q_W1_seed_block_BH.clip(lower=1e-300)),
                        s=18,alpha=.65,color=colors[category],label=f'{category} (n={len(z)})')
     axs[0].axvline(0,color='.35',lw=.8); axs[0].axhline(-np.log10(.05),color='.35',ls='--',lw=.8)
-    axs[0].set(xlabel='log₂ masked/vanilla IQR',ylabel='−log₁₀ BH q',title='Seed-block W1 permutation tests')
-    axs[0].legend(fontsize=8)
+    axs[0].set(xlabel='Relative ensemble breadth: log₂(targeted masking/vanilla IQR)',ylabel='Statistical evidence (−log₁₀ BH q)',title='Breadth difference and statistical evidence')
+    axs[0].legend(title='Result for each structural distance',fontsize=7.5,title_fontsize=8,frameon=False,loc='lower right')
     sns.histplot(plot.W1_normalized_by_pooled_IQR,bins=40,color=KV21_PALETTE['L403A_HM'],ax=axs[1])
     axs[1].axvline(plot.W1_normalized_by_pooled_IQR.median(),color='.25',ls='--',lw=1)
-    axs[1].set(xlabel='W1 / pooled IQR',ylabel='Intrachain distances',title='Normalized distributional separation')
-    fig.suptitle('Nominal first 100: chain-label-safe distribution statistics')
+    axs[1].set(xlabel='Distributional difference (Wasserstein distance ÷ pooled IQR)',ylabel='Structural distances',title='How different are targeted-masking and vanilla ensembles?')
+    for ax in axs: ax.title.set_fontsize(13)
+    fig.suptitle('First100 cohort: distributional differences across the full structural panel',fontsize=15,y=1.01)
     fig.tight_layout(); savefig(fig,'first100_seed_block_distribution_statistics')
 
     # Manuscript-style first-100 summary: one question per panel and no raw
@@ -467,6 +491,8 @@ def figures(results,summary,stable,frames,trajectory_audit,seed_breadth,rarefact
     breadth_summary=pd.read_csv(TAB/'l403a_first100_seed_level_global_breadth_summary.csv').iloc[0]
     retention_summary=(trajectory_audit.groupby('protocol',as_index=False)
         .agg(retained=('final_qc_retained','sum'),nominal=('final_qc_retained','size')))
+    retention_summary['protocol']=pd.Categorical(retention_summary.protocol,categories=['vanilla','masked'],ordered=True)
+    retention_summary=retention_summary.sort_values('protocol').reset_index(drop=True)
     fig,axs=plt.subplots(2,2,figsize=(12.5,9))
     sns.violinplot(data=seed_breadth,x='protocol',y='median_normalized_seed_IQR',order=['vanilla','masked'],
         hue='protocol',palette={'vanilla':KV21_PALETTE['L403A_VAN'],'masked':KV21_PALETTE['L403A_HM']},
@@ -474,84 +500,93 @@ def figures(results,summary,stable,frames,trajectory_audit,seed_breadth,rarefact
     sns.stripplot(data=seed_breadth,x='protocol',y='median_normalized_seed_IQR',order=['vanilla','masked'],
         color='.18',size=5,jitter=.13,alpha=.75,ax=axs[0,0])
     med=seed_breadth.groupby('protocol').median_normalized_seed_IQR.median()
-    axs[0,0].set(xlabel='',ylabel='Median normalized within-seed IQR',title='A  Breadth per independent seed')
+    axs[0,0].set(xlabel='',ylabel='Relative structural breadth per seed',title='A  Global structural breadth per seed')
+    axs[0,0].set_xticklabels(['Vanilla','Targeted masking'])
     axs[0,0].text(.03,.97,f"Median: {med['vanilla']:.2f} → {med['masked']:.2f} ({med['masked']/med['vanilla']:.2f}×)\nMann–Whitney p = {breadth_summary.mannwhitney_p_two_sided:.1e}",
         transform=axs[0,0].transAxes,va='top',fontsize=10)
 
     effects=distribution_stats.log2_IQR_ratio.replace([np.inf,-np.inf],np.nan).dropna()
     display_effects=effects.clip(-3,3)
-    axs[0,1].hist(display_effects[effects<=0],bins=np.linspace(-3,0,25),color=KV21_PALETTE['WT_HM'],alpha=.8,label='Narrower masked')
-    axs[0,1].hist(display_effects[effects>0],bins=np.linspace(0,3,25),color=KV21_PALETTE['L403A_HM'],alpha=.8,label='Broader masked')
+    axs[0,1].hist(display_effects[effects<=0],bins=np.linspace(-3,0,25),color=KV21_PALETTE['WT_HM'],alpha=.8,label='Broader in vanilla')
+    axs[0,1].hist(display_effects[effects>0],bins=np.linspace(0,3,25),color=KV21_PALETTE['L403A_HM'],alpha=.8,label='Broader after targeted masking')
     axs[0,1].axvline(0,color='.25',lw=1); axs[0,1].axvline(effects.median(),color='.2',ls='--',lw=1.2)
-    axs[0,1].set(xlim=(-3,3),xlabel='log₂ masked/vanilla IQR (display clipped at ±3)',ylabel='Intrachain distances',title='B  Breadth effect across 546 distances')
+    axs[0,1].set(xlim=(-3,3),xlabel='Relative ensemble breadth: targeted masking ÷ vanilla IQR (log₂ scale)',ylabel='Structural distances',title='B  Breadth across the full distance panel')
     axs[0,1].text(.03,.97,f"Median IQR ratio = {2**effects.median():.2f}×\n{(effects>0).mean():.1%} broader descriptively",
-        transform=axs[0,1].transAxes,va='top',fontsize=10); axs[0,1].legend(fontsize=8)
+        transform=axs[0,1].transAxes,va='top',fontsize=10); axs[0,1].legend(title='Direction of breadth difference',fontsize=8,title_fontsize=8,frameon=False)
 
     direct=((distribution_stats.q_broader_masked_seed_block_BH<.05)&(distribution_stats.log2_IQR_ratio>0))
-    category=pd.DataFrame({'result':['Broader\nBH q < 0.05','Not supported'],'count':[int(direct.sum()),int((~direct).sum())]})
+    category=pd.DataFrame({'result':['Significantly broader after\ntargeted masking','No significant broadening\nafter targeted masking'],'count':[int(direct.sum()),int((~direct).sum())]})
     sns.barplot(data=category,x='result',y='count',hue='result',legend=False,
         palette=[KV21_PALETTE['L403A_HM'],'#D8DDD9'],ax=axs[1,0])
     for patch,count in zip(axs[1,0].patches,category['count']):
         axs[1,0].text(patch.get_x()+patch.get_width()/2,patch.get_height()+8,f'{count}/546\n({count/546:.1%})',ha='center',fontweight='bold')
-    axs[1,0].set(xlabel='',ylabel='Intrachain distances',ylim=(0,590),title='C  Direct directional broadening test')
-    axs[1,0].text(.03,.97,'One-sided seed-block permutation\nBH-FDR across 546 distances',transform=axs[1,0].transAxes,va='top',fontsize=10)
+    axs[1,0].set(xlabel='',ylabel='Structural distances',ylim=(0,590),title='C  Direct directional broadening test')
+    axs[1,0].text(.03,.97,'One-sided seed-block permutation\nBH-FDR across the full distance panel',transform=axs[1,0].transAxes,va='top',fontsize=10)
 
-    retention_summary['label']=retention_summary.protocol.str.capitalize()
+    retention_summary['label']=retention_summary.protocol.map({'vanilla':'Vanilla','masked':'Targeted masking'})
     colors=[KV21_PALETTE['L403A_VAN'] if p=='vanilla' else KV21_PALETTE['L403A_HM'] for p in retention_summary.protocol]
     bars=axs[1,1].bar(retention_summary.label,retention_summary.retained,color=colors,width=.62)
     for bar,(_,row) in zip(bars,retention_summary.iterrows()):
         axs[1,1].text(bar.get_x()+bar.get_width()/2,bar.get_height()+2,f"{int(row.retained)}/{int(row.nominal)}",ha='center',fontweight='bold',fontsize=12)
-    axs[1,1].axhline(100,color='.35',ls='--',lw=.8); axs[1,1].set(ylim=(0,112),ylabel='Trajectories retained after final QC',title='D  Same nominal budget, different retention')
-    axs[1,1].text(.03,.88,'Fixed first 20 seeds × 5 models\nFailed trajectories are not replaced',transform=axs[1,1].transAxes,va='top',fontsize=10)
+    axs[1,1].axhline(100,color='.35',ls='--',lw=.8); axs[1,1].set(ylim=(0,112),ylabel='Model–seed trajectories retained after final QC',title='D  Same First100 cohort, different retention')
+    axs[1,1].text(.03,.97,'Five model parameterizations per seed; failed trajectories are not replaced',transform=axs[1,1].transAxes,va='top',fontsize=8.5)
     for ax in axs.flat: sns.despine(ax=ax)
-    fig.suptitle('Kv2.1 L403A: masked sampling yields more breadth within the first 100 trajectories',fontsize=16,fontweight='semibold')
+    fig.suptitle('Kv2.1 L403A: targeted masking broadens the First100 structural ensemble',fontsize=16,fontweight='semibold')
     fig.tight_layout(); savefig(fig,'first100_masked_sampling_breadth_main_summary')
 
     # Heatmap scorecard designed to make the retention-versus-breadth tradeoff
     # readable without combining unlike quantities on one color scale.
     protocol_score=pd.DataFrame({
         'Vanilla':[float(retention_summary.loc[retention_summary.protocol=='vanilla','retained'].iloc[0])/100,med['vanilla']],
-        'Masked':[float(retention_summary.loc[retention_summary.protocol=='masked','retained'].iloc[0])/100,med['masked']]},
+        'Targeted masking':[float(retention_summary.loc[retention_summary.protocol=='masked','retained'].iloc[0])/100,med['masked']]},
         index=['Final-QC retention','Median breadth per seed'])
     protocol_ann=pd.DataFrame({
         'Vanilla':['99/100\n(99%)',f"{med['vanilla']:.2f}"],
-        'Masked':['85/100\n(85%)',f"{med['masked']:.2f}" ]},index=protocol_score.index)
-    magnitude=pd.DataFrame({'First 100':[2**effects.median()]},index=['Median masked/vanilla IQR'])
-    magnitude_ann=pd.DataFrame({'First 100':[f'{2**effects.median():.2f}×']},index=magnitude.index)
-    prevalence=pd.DataFrame({'First 100':[(effects>0).mean(),direct.mean()]},
+        'Targeted masking':['85/100\n(85%)',f"{med['masked']:.2f}" ]},index=protocol_score.index)
+    magnitude=pd.DataFrame({'First100 cohort':[2**effects.median()]},index=['Median targeted-masking/vanilla IQR'])
+    magnitude_ann=pd.DataFrame({'First100 cohort':[f'{2**effects.median():.2f}×']},index=magnitude.index)
+    prevalence=pd.DataFrame({'First100 cohort':[(effects>0).mean(),direct.mean()]},
         index=['Broader descriptively','Directionally broader, BH q<0.05'])
     prevalence_ann=prevalence.map(lambda x:f'{x:.1%}')
     fig,axs=plt.subplots(1,3,figsize=(14.5,4.8),gridspec_kw={'width_ratios':[1.35,.8,1.15]})
     sns.heatmap(protocol_score,annot=protocol_ann,fmt='',vmin=0,vmax=1,
         cmap=sns.light_palette(KV21_PALETTE['L403A_HM'],as_cmap=True),linewidths=1,linecolor='white',
-        cbar_kws={'label':'Fraction or normalized breadth'},annot_kws={'fontsize':13,'fontweight':'bold'},ax=axs[0])
+        cbar_kws={'label':'Retention fraction or relative breadth'},annot_kws={'fontsize':13,'fontweight':'bold'},ax=axs[0])
     sns.heatmap(magnitude,annot=magnitude_ann,fmt='',vmin=1,vmax=2,
         cmap=sns.light_palette(KV21_PALETTE['L403A_HM'],as_cmap=True),linewidths=1,linecolor='white',
-        cbar_kws={'label':'IQR ratio'},annot_kws={'fontsize':16,'fontweight':'bold'},ax=axs[1])
+        cbar_kws={'label':'Relative breadth (targeted masking ÷ vanilla)'},annot_kws={'fontsize':16,'fontweight':'bold'},ax=axs[1])
     sns.heatmap(prevalence,annot=prevalence_ann,fmt='',vmin=0,vmax=1,
         cmap=sns.light_palette(KV21_PALETTE['L403A_HM'],as_cmap=True),linewidths=1,linecolor='white',
-        cbar_kws={'label':'Fraction of 546 distances'},annot_kws={'fontsize':14,'fontweight':'bold'},ax=axs[2])
-    for ax,title in zip(axs,['Protocol trade-off','Typical distance effect','How widespread?']):
+        cbar_kws={'label':'Share of structural distances'},annot_kws={'fontsize':14,'fontweight':'bold'},ax=axs[2])
+    for ax,title in zip(axs,['MSA-treatment trade-off','Typical distance effect','How widespread?']):
         ax.set_title(title,fontweight='bold',fontsize=13); ax.set_xlabel(''); ax.set_ylabel('')
         ax.tick_params(axis='x',rotation=0,labelsize=10); ax.tick_params(axis='y',rotation=0,labelsize=10)
-    axs[0].text(.5,-.27,'Masked: −14 percentage points retained, +0.27 normalized breadth',
+    axs[0].text(.5,-.27,'Targeted masking: −14 percentage points retained, +0.27 relative breadth',
         transform=axs[0].transAxes,ha='center',fontsize=10,fontweight='bold',color=KV21_PALETTE['L403A_HM'])
-    fig.suptitle('First 100 nominal trajectories: masking trades retention for broader structural sampling',
+    fig.suptitle('First100 cohort: targeted masking trades retention for broader structural sampling',
         fontsize=16,fontweight='semibold')
     fig.tight_layout(); savefig(fig,'first100_retention_vs_breadth_heatmap_scorecard')
 
-    # A compact map of every analyzed distance. Columns are sorted by effect;
-    # the lower stripe marks which effects pass the direct broadening test.
-    ordered=distribution_stats.sort_values('log2_IQR_ratio').reset_index(drop=True)
-    effect_row=ordered.log2_IQR_ratio.clip(-3,3).to_numpy()[None,:]
-    sig_row=((ordered.q_broader_masked_seed_block_BH<.05)&(ordered.log2_IQR_ratio>0)).astype(int).to_numpy()[None,:]
-    fig,axs=plt.subplots(2,1,figsize=(13,2.8),gridspec_kw={'height_ratios':[2,1]},sharex=True)
-    sns.heatmap(effect_row,cmap=sns.diverging_palette(18,135,as_cmap=True),center=0,vmin=-3,vmax=3,
-        xticklabels=False,yticklabels=['IQR effect'],cbar_kws={'label':'log₂ masked/vanilla IQR'},ax=axs[0])
-    sns.heatmap(sig_row,cmap=sns.light_palette(KV21_PALETTE['L403A_HM'],as_cmap=True),vmin=0,vmax=1,
-        xticklabels=False,yticklabels=['Broader q<0.05'],cbar=False,ax=axs[1])
-    axs[1].set_xlabel('All 546 intrachain distances, ordered from narrower to broader under masking')
-    fig.suptitle('First 100: effect size and direct evidence of masked broadening',fontweight='semibold')
+    # Every point is one distance: effect magnitude and direct evidence are
+    # readable simultaneously, unlike a rank-ordered color stripe.
+    evidence=distribution_stats.copy()
+    evidence['display_ratio']=evidence.IQR_ratio_masked_over_vanilla.clip(1/8,8)
+    evidence['minus_log10_q']=-np.log10(evidence.q_broader_masked_seed_block_BH.clip(lower=1e-300))
+    evidence['significantly_broader']=(evidence.q_broader_masked_seed_block_BH<.05)&(evidence.IQR_ratio_masked_over_vanilla>1)
+    fig,ax=plt.subplots(figsize=(9,6.5))
+    unsupported=evidence[~evidence.significantly_broader]
+    supported=evidence[evidence.significantly_broader]
+    ax.scatter(unsupported.display_ratio,unsupported.minus_log10_q,s=22,alpha=.42,
+               color='#AEB5B0',edgecolor='none',label=f'No significant broadening after targeted masking ({len(unsupported)/len(evidence):.1%})')
+    ax.scatter(supported.display_ratio,supported.minus_log10_q,s=26,alpha=.72,
+               color=KV21_PALETTE['L403A_HM'],edgecolor='none',label=f'Significantly broader after targeted masking ({len(supported)/len(evidence):.1%})')
+    ax.axvline(1,color='.2',lw=1.1); ax.axhline(-np.log10(.05),color='.35',ls='--',lw=1)
+    ax.set_xscale('log',base=2); ax.set_xlim(1/8,8); ax.set_xticks([1/8,1/4,1/2,1,2,4,8]); ax.set_xticklabels(['⅛×','¼×','½×','1×','2×','4×','8×'])
+    ax.set(xlabel='Relative ensemble breadth (targeted masking ÷ vanilla IQR)',ylabel='Evidence for broadening after targeted masking (−log₁₀ BH q)',
+           title='Effect magnitude and statistical evidence across the full distance panel')
+    ax.text(.02,.98,f"Typical distance: {evidence.IQR_ratio_masked_over_vanilla.median():.2f}× broader after targeted masking\n{(evidence.IQR_ratio_masked_over_vanilla>1).mean():.1%} broader after targeted masking (descriptive)",
+            transform=ax.transAxes,va='top',fontsize=10)
+    ax.legend(title='Directional test result (BH q < 0.05)',frameon=False,loc='upper left',bbox_to_anchor=(0,.84),title_fontsize=9); sns.despine(ax=ax)
     fig.tight_layout(); savefig(fig,'first100_all_distance_breadth_evidence_map')
     # Direct first-100 versus full-QC comparison. Asterisks mark a one-sided
     # seed-block permutation test of masked IQR > vanilla IQR after BH-FDR.
@@ -567,28 +602,28 @@ def figures(results,summary,stable,frames,trajectory_audit,seed_breadth,rarefact
     fig,ax=plt.subplots(figsize=(8.5,12))
     sns.heatmap(heat,cmap=sns.diverging_palette(18,135,as_cmap=True),center=0,vmin=-lim,vmax=lim,
                 annot=annotations,fmt='',linewidths=.35,linecolor='white',ax=ax,
-                cbar_kws={'label':'log₂ masked/vanilla IQR'})
-    ax.set_xticklabels(['Nominal first 100','Full QC'],rotation=0); ax.set_ylabel('')
-    ax.set_title('Strongest reproducible masked broadening\n* one-sided seed-block permutation, BH q < 0.05')
+                cbar_kws={'label':'log₂(targeted masking/vanilla IQR)\nGreen: broader after masking; red: broader in vanilla'})
+    ax.set_xticklabels(['First100 cohort','Complete ensemble'],rotation=0); ax.set_ylabel('')
+    ax.set_title('Strongest reproducible broadening after targeted masking\n* one-sided seed-block permutation, BH q < 0.05')
     fig.tight_layout(); savefig(fig,'first100_vs_full_directional_breadth_heatmap')
     paired.to_csv(TAB/'l403a_first100_vs_full_directional_breadth_statistics.csv',index=False)
 
     # Compact summary heatmaps keep counts/fractions separate from continuous
     # effect sizes so unlike quantities are not encoded on one color scale.
     cohorts={'Nominal first 100':distribution_stats,'Full QC':full_distribution_stats}
-    effect=pd.DataFrame({name:{'Median masked/vanilla IQR':g.IQR_ratio_masked_over_vanilla.median(),
+    effect=pd.DataFrame({name:{'Median targeted-masking/vanilla IQR':g.IQR_ratio_masked_over_vanilla.median(),
         'Median W1 / pooled IQR':g.W1_normalized_by_pooled_IQR.median()} for name,g in cohorts.items()})
-    fractions=pd.DataFrame({name:{'Masked IQR > vanilla IQR':(g.log2_IQR_ratio>0).mean(),
+    fractions=pd.DataFrame({name:{'Targeted-masking IQR > vanilla IQR':(g.log2_IQR_ratio>0).mean(),
         'Directional BH q < 0.05':((g.q_broader_masked_seed_block_BH<.05)&(g.log2_IQR_ratio>0)).mean()}
         for name,g in cohorts.items()})
     fig,axs=plt.subplots(1,2,figsize=(13.5,5.4))
     sns.heatmap(effect,annot=True,fmt='.2f',cmap=sns.light_palette(KV21_PALETTE['L403A_HM'],as_cmap=True),
-                vmin=0,cbar_kws={'label':'Effect size'},ax=axs[0])
+                vmin=0,cbar_kws={'label':'Effect magnitude\n(larger = greater difference)'},ax=axs[0])
     sns.heatmap(fractions,annot=True,fmt='.1%',cmap=sns.light_palette(KV21_PALETTE['L403A_HM'],as_cmap=True),
-                vmin=0,vmax=1,cbar_kws={'label':'Fraction of 546 distances'},ax=axs[1])
-    for ax in axs: ax.set_xlabel(''); ax.set_ylabel(''); ax.tick_params(axis='x',rotation=0,labelsize=9); ax.tick_params(axis='y',labelsize=9)
+                vmin=0,vmax=1,cbar_kws={'label':'Share of structural distances'},ax=axs[1])
+    for ax in axs: ax.set_xlabel(''); ax.set_ylabel(''); ax.set_xticklabels(['First100 cohort','Complete ensemble'],rotation=0); ax.tick_params(axis='x',labelsize=9); ax.tick_params(axis='y',labelsize=9)
     axs[0].set_title('Typical effect'); axs[1].set_title('Prevalence of broadening')
-    fig.suptitle('Masked versus vanilla: nominal first 100 and full QC')
+    fig.suptitle('Targeted masking versus vanilla across sampling depths')
     fig.tight_layout(); savefig(fig,'first100_vs_full_breadth_summary_heatmaps')
 
     # 2 × 2 reproducibility table: an immediately readable count of which
@@ -602,29 +637,29 @@ def figures(results,summary,stable,frames,trajectory_audit,seed_breadth,rarefact
     sns.heatmap(concordance,annot=True,fmt='d',cmap=sns.light_palette(KV21_PALETTE['L403A_HM'],as_cmap=True),
                 cbar_kws={'label':'Number of intrachain distances'},linewidths=1,linecolor='white',ax=ax,
                 annot_kws={'fontsize':16})
-    ax.set_xlabel('Full QC'); ax.set_ylabel('Nominal first 100')
-    ax.set_title('Does significant masked broadening reproduce?\nOne-sided seed-block permutation; BH q < 0.05')
+    ax.set_xlabel('Complete 100-seed ensemble'); ax.set_ylabel('First100 cohort')
+    ax.set_title('Does significant broadening after targeted masking reproduce?\nOne-sided seed-block permutation; BH q < 0.05')
     fig.tight_layout(); savefig(fig,'first100_vs_full_broadening_concordance_heatmap')
     concordance.to_csv(TAB/'l403a_first100_vs_full_broadening_concordance.csv')
 
     # Every distance in one quadrant plot; colors encode reproducibility of the
     # direct test, while the axes encode effect magnitude rather than p-values.
     paired['significance']='Neither cohort'
-    paired.loc[sig100&~sigfull,'significance']='First 100 only'
-    paired.loc[~sig100&sigfull,'significance']='Full QC only'
+    paired.loc[sig100&~sigfull,'significance']='First100 cohort only'
+    paired.loc[~sig100&sigfull,'significance']='Complete ensemble only'
     paired.loc[sig100&sigfull,'significance']='Both cohorts'
-    point_colors={'Neither cohort':'#B8B8B8','First 100 only':KV21_PALETTE['L403A_VAN'],
-                  'Full QC only':KV21_PALETTE['WT_HM'],'Both cohorts':KV21_PALETTE['L403A_HM']}
+    point_colors={'Neither cohort':'#B8B8B8','First100 cohort only':KV21_PALETTE['L403A_VAN'],
+                  'Complete ensemble only':KV21_PALETTE['WT_HM'],'Both cohorts':KV21_PALETTE['L403A_HM']}
     fig,ax=plt.subplots(figsize=(7.5,6.5))
-    for category in ['Neither cohort','First 100 only','Full QC only','Both cohorts']:
+    for category in ['Neither cohort','First100 cohort only','Complete ensemble only','Both cohorts']:
         g=paired[paired.significance==category]
         ax.scatter(g.log2_IQR_ratio_first100,g.log2_IQR_ratio_full,s=22,alpha=.65,
                    color=point_colors[category],label=f'{category} (n={len(g)})')
     lim=np.nanquantile(np.abs(paired[['log2_IQR_ratio_first100','log2_IQR_ratio_full']]),.99)
     ax.plot([-lim,lim],[-lim,lim],color='.3',lw=1); ax.axhline(0,color='.65',lw=.8); ax.axvline(0,color='.65',lw=.8)
-    ax.set(xlim=(-lim,lim),ylim=(-lim,lim),xlabel='First 100: log₂ masked/vanilla IQR',
-           ylabel='Full QC: log₂ masked/vanilla IQR',title='Breadth effects agree from early to full sampling')
-    ax.legend(fontsize=8,loc='lower right'); sns.despine(ax=ax); fig.tight_layout()
+    ax.set(xlim=(-lim,lim),ylim=(-lim,lim),xlabel='First100 cohort: log₂(targeted masking/vanilla IQR)',
+           ylabel='Complete ensemble: log₂(targeted masking/vanilla IQR)',title='Breadth effects agree across sampling depths')
+    ax.legend(title='Where significant broadening occurs',fontsize=8,title_fontsize=8,loc='lower right',frameon=False); sns.despine(ax=ax); fig.tight_layout()
     savefig(fig,'first100_vs_full_breadth_quadrant_scatter')
 
     # Stratify the headline result by distance definition. This checks that the
@@ -643,11 +678,11 @@ def figures(results,summary,stable,frames,trajectory_audit,seed_breadth,rarefact
     ratio=ratio[['Nominal first 100','Full QC']]; sigfrac=sigfrac[['Nominal first 100','Full QC']]
     fig,axs=plt.subplots(1,2,figsize=(10.5,4.5))
     sns.heatmap(ratio,annot=True,fmt='.2f',vmin=1,cmap=sns.light_palette(KV21_PALETTE['L403A_HM'],as_cmap=True),
-                cbar_kws={'label':'Median masked/vanilla IQR'},ax=axs[0])
+                cbar_kws={'label':'Typical breadth ratio\n>1 means broader after targeted masking'},ax=axs[0])
     sns.heatmap(sigfrac,annot=True,fmt='.1%',vmin=0,vmax=1,cmap=sns.light_palette(KV21_PALETTE['L403A_HM'],as_cmap=True),
-                cbar_kws={'label':'Fraction of distances'},ax=axs[1])
+                cbar_kws={'label':'Share significantly broader\nafter targeted masking (BH q < 0.05)'},ax=axs[1])
     axs[0].set_title('Broadening magnitude'); axs[1].set_title('Significantly broader')
-    for ax in axs: ax.set_xlabel(''); ax.set_ylabel(''); ax.tick_params(axis='x',rotation=0)
+    for ax in axs: ax.set_xlabel(''); ax.set_ylabel(''); ax.set_xticklabels(['First100 cohort','Complete ensemble'],rotation=0); ax.set_yticklabels(['Cα','Shortest non-H'],rotation=0)
     fig.suptitle('Conclusion is consistent across distance definitions')
     fig.tight_layout(); savefig(fig,'first100_vs_full_breadth_by_distance_type_heatmaps')
     type_summary.to_csv(TAB/'l403a_first100_vs_full_breadth_by_distance_type.csv',index=False)
