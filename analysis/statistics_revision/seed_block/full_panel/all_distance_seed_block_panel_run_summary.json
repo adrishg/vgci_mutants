@@ -1,0 +1,20 @@
+{
+  "status": "completed_seed_block_all_distance_discovery_panel",
+  "git_commit": "674fdb02b6977e632b8868cd48c514e823b46e57",
+  "deterministic_point_estimate_seed": null,
+  "registered_ensembles": 18,
+  "comparisons": 37,
+  "distance_effect_rows": 35602,
+  "primary_estimand": "median retained recycle per seed-model trajectory; equal available AF2 models within seed; equal seeds",
+  "survivor_policy": "all final-QC survivors; no common-survivor conditioning",
+  "leave_one_AF2_model_out": "complete for every distance and comparison",
+  "mass_univariate_p_or_q_values": "not calculated; panel is descriptive discovery and fraction-significant is intentionally removed",
+  "confirmatory_focal_mode": {
+    "permutations": 9999,
+    "bootstrap_replicates": 2000,
+    "random_seed": 20260819,
+    "location": "analysis/statistics_revision/seed_block"
+  },
+  "nonfactorial_design_policy": "Cav1.2/Nav1.5 masked WT-mutant contrasts are labeled protocol-specific explorations; vanilla sequence contrasts are primary",
+  "elapsed_seconds": 45.00346398353577
+}

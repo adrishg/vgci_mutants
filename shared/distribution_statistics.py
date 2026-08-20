@@ -14,8 +14,10 @@ import re
 
 import numpy as np
 import pandas as pd
-from scipy.stats import ks_2samp, wasserstein_distance
+from scipy.stats import wasserstein_distance
 from statsmodels.stats.multitest import multipletests
+
+from shared.seed_block_statistics import weighted_quantile
 
 
 _SEED = re.compile(r"_seed_(\d+)", re.I)
@@ -163,12 +165,7 @@ def _replicated_block_quantiles(
     blocks: Sequence[np.ndarray], counts: np.ndarray,
     quantiles: Sequence[float] = (.25, .5, .75),
 ) -> np.ndarray:
-    """Exact NumPy-style quantiles after integer block replication.
-
-    Bootstrap draws duplicate whole blocks.  Sorting the fixed values once and
-    applying each draw's integer block counts reproduces the expanded sample
-    without repeatedly concatenating and sorting thousands of recycle rows.
-    """
+    """Equal-block weighted inverse-ECDF quantiles after block resampling."""
     values = np.concatenate([np.asarray(block, dtype=float) for block in blocks])
     block_ids = np.concatenate([
         np.full(len(block), index, dtype=int) for index, block in enumerate(blocks)
@@ -176,21 +173,16 @@ def _replicated_block_quantiles(
     order = np.argsort(values, kind="mergesort")
     values = values[order]
     block_ids = block_ids[order]
-    row_multiplicity = counts[:, block_ids]
+    within_block = np.concatenate([
+        np.full(len(block), 1.0 / len(block)) for block in blocks
+    ])[order]
+    row_multiplicity = counts[:, block_ids] * within_block
     cumulative = np.cumsum(row_multiplicity, axis=1)
     totals = cumulative[:, -1]
     output = np.empty((len(counts), len(quantiles)), dtype=float)
     for column, quantile in enumerate(quantiles):
-        position = (totals - 1) * quantile
-        lower = np.floor(position).astype(int)
-        upper = np.ceil(position).astype(int)
-        lower_index = (cumulative > lower[:, None]).argmax(axis=1)
-        upper_index = (cumulative > upper[:, None]).argmax(axis=1)
-        fraction = position - lower
-        output[:, column] = (
-            values[lower_index] * (1.0 - fraction)
-            + values[upper_index] * fraction
-        )
+        indices = (cumulative >= (totals * quantile)[:, None]).argmax(axis=1)
+        output[:, column] = values[indices]
     return output
 
 
@@ -203,14 +195,19 @@ def distribution_metrics(
     blocks_a: Sequence[np.ndarray], blocks_b: Sequence[np.ndarray], *, epsilon: float = IQR_EPSILON
 ) -> dict[str, float | bool]:
     """Effect sizes and descriptive summaries for two block collections."""
-    a, b = _flatten(blocks_a), _flatten(blocks_b)
+    a, wa = _weighted_samples(blocks_a)
+    b, wb = _weighted_samples(blocks_b)
     if not len(a) or not len(b):
         raise ValueError("Both ensembles require at least one valid observation")
-    median_a, median_b = float(np.median(a)), float(np.median(b))
-    iqr_a = float(np.quantile(a, .75) - np.quantile(a, .25))
-    iqr_b = float(np.quantile(b, .75) - np.quantile(b, .25))
+    qa = weighted_quantile(a, [.25, .5, .75], wa)
+    qb = weighted_quantile(b, [.25, .5, .75], wb)
+    median_a, median_b = float(qa[1]), float(qb[1])
+    iqr_a = float(qa[2] - qa[0])
+    iqr_b = float(qb[2] - qb[0])
     pooled = np.concatenate([a, b])
-    pooled_iqr = float(np.quantile(pooled, .75) - np.quantile(pooled, .25))
+    pooled_weights = np.concatenate([wa * .5, wb * .5])
+    pooled_q = weighted_quantile(pooled, [.25, .75], pooled_weights)
+    pooled_iqr = float(pooled_q[1] - pooled_q[0])
     zero_a, zero_b = iqr_a <= epsilon, iqr_b <= epsilon
     ratio = float((iqr_b + epsilon) / (iqr_a + epsilon))
     w1 = trajectory_balanced_w1(blocks_a, blocks_b)
@@ -227,8 +224,21 @@ def distribution_metrics(
         "W1_A": w1,
         "pooled_IQR_A": pooled_iqr,
         "W1_normalized_by_pooled_IQR": w1 / pooled_iqr if pooled_iqr > epsilon else np.nan,
-        "KS_D": float(ks_2samp(a, b).statistic),
+        "KS_D": _weighted_ks(a, wa, b, wb),
     }
+
+
+def _weighted_ks(a: np.ndarray, wa: np.ndarray, b: np.ndarray, wb: np.ndarray) -> float:
+    """Maximum difference between the same weighted ECDFs used by W1."""
+    support = np.unique(np.concatenate([a, b]))
+    order_a, order_b = np.argsort(a), np.argsort(b)
+    a, wa, b, wb = a[order_a], wa[order_a], b[order_b], wb[order_b]
+    cdf_a, cdf_b = np.cumsum(wa) / wa.sum(), np.cumsum(wb) / wb.sum()
+    ia = np.searchsorted(a, support, side="right") - 1
+    ib = np.searchsorted(b, support, side="right") - 1
+    fa = np.where(ia >= 0, cdf_a[np.maximum(ia, 0)], 0.0)
+    fb = np.where(ib >= 0, cdf_b[np.maximum(ib, 0)], 0.0)
+    return float(np.max(np.abs(fa - fb)))
 
 
 def pairing_audit(a: Mapping, b: Mapping) -> dict[str, float | int]:

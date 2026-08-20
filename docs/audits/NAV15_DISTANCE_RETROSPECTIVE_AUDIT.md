@@ -99,13 +99,13 @@ largest current relationship is in QQQ masked: the Spearman correlation
 between mean gate diagonal and the central Q1170–N1765 shortest distance is
 approximately -0.36. Thus masking can enlarge and square the pore while moving
 the central QQQ residue closer to N1765, but the relationship is moderate and
-must be checked against the full pocket fingerprint and future aligned
+is best interpreted together with the full pocket fingerprint and aligned
 structural measurements.
 
-## Next distance pass
+## Additional structural measurements
 
-Before RMSD, one new coordinate pass can add the highest-value missing raw
-measurements without modifying any structure:
+An additional coordinate pass could complement the current distance analysis
+without modifying any structure. The informative measurements are:
 
 1. Exact upper- and lower-gate side-chain distances for all four domains.
 2. All three IFM/QQQ residues against the complete receptor list.
@@ -113,15 +113,15 @@ measurements without modifying any structure:
 4. R1512 guanidinium-to-F1522 ring-centroid distance and angle.
 5. Linker–CTD contact counts using one fixed heavy-atom cutoff.
 
-These values should be written as one tidy row per original PDB and joined to
-the independent convergence manifests. Experimental-distance agreement must
-not be used as a model-quality filter.
+The natural data representation is one tidy row per original PDB, joined to
+the independent convergence manifests. Experimental-distance agreement is not
+an appropriate model-quality filter.
 
-## Unresolved provenance check
+## Template provenance
 
 No AlphaFold template-hit files or recorded maximum-template-date setting were
-found in the repository or the local analysis folder inspected here. Therefore
-8VYJ/8VYK absence from the template set has not yet been demonstrated, and the
-analysis should not currently be described as blind or post-training
-validation. The template-hit files or original AlphaFold run configuration are
-needed to document that claim.
+found in the repository or the local analysis folder inspected here. The
+absence of 8VYJ/8VYK from the template set is therefore unverified, so the
+analysis does not establish blind or post-training validation. That claim
+would require the template-hit files or the original AlphaFold run
+configuration.

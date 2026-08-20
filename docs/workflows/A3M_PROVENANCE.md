@@ -5,20 +5,21 @@ On 2026-07-29, a recursive case-insensitive search of the repository found no
 found unrelated A3Ms but none of the named production Kv2.1, Nav1.5, or
 CaV1.2 masked inputs.
 
-Copy or link the production A3M tree so that it contains the relative paths in
-`mask_definitions.yaml`, then run:
+Programmatic comparison with the original alignments requires a production A3M
+tree containing the relative paths in `mask_definitions.yaml`. With that tree,
+the comparison command is:
 
 ```bash
 python -m scripts.ensemble_rmsf_analysis.extract_masks \
   --a3m-root /path/to/production/vgic_mutants
 ```
 
-The RMSF analysis itself is no longer blocked. Its direct-mask annotations now
-use `authoritative_mask_definitions.yaml`, transcribed from the user-supplied
+The RMSF analysis uses direct-mask annotations from
+`authoritative_mask_definitions.yaml`, transcribed from the user-supplied
 authoritative RMSF mask table in 1-based raw AlphaFold query/model numbering.
-These annotations must not be described as programmatically extracted from
-A3Ms.
+Their provenance is transcription from that table rather than programmatic
+extraction from A3Ms.
 
-The A3M command still fails loudly when the production files are absent. If
-they become available, use it to compare the extracted exact position sets
-against the supplied table.
+The A3M command exits with an error when the production files are absent. Its
+output provides a direct comparison between extracted position sets and the
+supplied table when the production tree is present.

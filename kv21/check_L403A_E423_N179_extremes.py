@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+import math
 
 import pandas as pd
 
@@ -23,10 +24,43 @@ DISTANCE_COLUMNS = {
     "D": "CA_CA_D_GLU425_CA-D_ASN181_CA",
 }
 
+def experimental_e423_n179_distances(path: Path):
+    """Read same-chain E423/N179 C-alpha distances from an experimental PDB."""
+    coordinates = {}
+    with path.open() as handle:
+        for line in handle:
+            if not line.startswith("ATOM") or line[12:16].strip() != "CA":
+                continue
+            residue, chain = line[17:20].strip(), line[21].strip()
+            try:
+                number = int(line[22:26])
+            except ValueError:
+                continue
+            if (residue, number) in {("GLU", 423), ("ASN", 179)}:
+                coordinates[(chain, residue, number)] = tuple(
+                    float(line[start:stop]) for start, stop in ((30, 38), (38, 46), (46, 54))
+                )
+    return {
+        chain: math.dist(
+            coordinates[(chain, "GLU", 423)], coordinates[(chain, "ASN", 179)]
+        )
+        for chain in "ABCD"
+    }
+
+
+WT_EXPERIMENTAL = experimental_e423_n179_distances(Path("kv21/experimental/8SD3.pdb"))
+L403A_EXPERIMENTAL = experimental_e423_n179_distances(Path("kv21/experimental/8SDA.pdb"))
+WT_MAXIMUM = max(WT_EXPERIMENTAL.values())
+SHIFTED_EXPERIMENTAL = sorted(
+    value for value in L403A_EXPERIMENTAL.values() if value > WT_MAXIMUM
+)
+if len(SHIFTED_EXPERIMENTAL) != 2:
+    raise ValueError("Expected two 8SDA E423-N179 distances above the 8SD3 maximum")
+
 THRESHOLDS = {
-    "shifted threshold": 12.84,
-    "8SDA shorter elongated distance": 14.17,
-    "8SDA longer elongated distance": 16.24,
+    "shifted threshold": (WT_MAXIMUM + SHIFTED_EXPERIMENTAL[0]) / 2,
+    "8SDA shorter elongated distance": SHIFTED_EXPERIMENTAL[0],
+    "8SDA longer elongated distance": SHIFTED_EXPERIMENTAL[1],
 }
 
 OUTPUT_DIR = DATA_DIR / "analysis"
@@ -199,7 +233,7 @@ def analyze(condition: str, path: Path):
 
     print("\nNUMBER OF SHIFTED SUBUNITS PER STRUCTURE")
     print("-" * 90)
-    print("Threshold: 12.84 Å")
+    print(f"Threshold: {THRESHOLDS['shifted threshold']:.6f} Å")
 
     occupancy = (
         work["number_shifted_subunits"]

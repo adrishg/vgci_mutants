@@ -1,0 +1,21 @@
+{
+  "analysis": "seed_block_structural_ensemble_inference",
+  "mode": "publication",
+  "bootstrap_replicates": 2000,
+  "permutations": 9999,
+  "random_seed": 20260819,
+  "git_commit": "674fdb02b6977e632b8868cd48c514e823b46e57",
+  "primary_resampling_unit": "seed",
+  "within_trajectory_reduction": "median for primary continuous geometry; explicitly named fractions or earliest/latest summaries for focal categorical analyses",
+  "within_seed_weighting": "equal available AF2 model parameterizations after the specified trajectory reduction",
+  "artifact_availability": {
+    "nav15_historical_nested_lfs_object": false,
+    "nav15_regional_rmsd_regeneration": true,
+    "f412l_objective_representative_pdb": false,
+    "all_distance_seed_block_panel": true
+  },
+  "design_scope": {
+    "kv21": "shared mask supports sequence-by-masking contrasts",
+    "nav15_cav12": "condition-specific masks make masked WT-mutant comparisons protocol-specific"
+  }
+}

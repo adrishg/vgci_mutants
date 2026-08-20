@@ -329,12 +329,13 @@ not guarantee that the selectivity-filter ring remains assembled.
 - RMSD clustering, seed-level summaries, and state occupancy estimates remain necessary before making
   strong claims about conformational-state sampling.
 
-## Current next steps
+## Scientific extensions
 
-1. Complete seed-level and domain-specific RMSD analyses.
-2. Cluster ensembles using independent seed-level representatives.
-3. Quantify state occupancy rather than relying only on marginal distance widths.
-4. Test whether masking enriches experimentally compatible states.
+The distance-distribution results can be extended with seed-level and
+domain-specific RMSD, clustering of independent seed representatives, and
+explicit state-occupancy estimates. Together, those measurements would test
+whether masking enriches experimentally compatible states without relying on
+marginal distance widths alone.
 
 ## Citation
 

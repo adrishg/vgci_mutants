@@ -9,3 +9,6 @@
 *.csv.gz filter=lfs diff=lfs merge=lfs -text
 nav15/dataRMSD/Nav15_all_models_all_references_RMSD_distances.csv !text !filter !merge !diff
 nav15/dataRMSD/Nav15_all_models_all_references_RMSD_distances_OK3.csv !text !filter !merge !diff
+# Keep the reproducible 8 MB replacement table directly in Git. This avoids
+# making the reviewer-facing provenance depend on another remote LFS object.
+analysis/statistics_revision/seed_block/nav15_regional_rmsd/nav15_regional_rmsd_per_structure.csv.gz !text !filter !merge !diff

@@ -1,0 +1,97 @@
+{
+  "status": "completed_traceable_nav15_regional_rmsd_regeneration",
+  "historical_source_status": {
+    "nested_git_lfs_oid": "e93fda439af7fb35a7cb8464485e164247b5ff64b784054df476f1349f12cbb4",
+    "github_lfs_batch_query_result": "404 Object does not exist on the server",
+    "policy": "historical regional medians retired; regenerated definitions and values are authoritative"
+  },
+  "git_commit_at_run": "674fdb02b6977e632b8868cd48c514e823b46e57",
+  "random_seed_base": 20260820,
+  "bootstrap_replicates": 2000,
+  "per_structure_rows": 34998,
+  "dataset_counts": {
+    "qqq_masked": 4999,
+    "qqq_masked_v2": 5000,
+    "qqq_vanilla": 5000,
+    "wt_masked": 5000,
+    "wt_masked_v2": 4999,
+    "wt_masked_v2_noIFM": 5000,
+    "wt_vanilla": 5000
+  },
+  "reference_ids": [
+    "6UZ3",
+    "7DTC",
+    "7FBS",
+    "8T6L",
+    "8VYJ",
+    "8VYK"
+  ],
+  "regions": [
+    {
+      "region_id": "pore_s5_s6_helices",
+      "number_of_requested_CA": 206
+    },
+    {
+      "region_id": "dii_s6",
+      "number_of_requested_CA": 29
+    },
+    {
+      "region_id": "ifm_motif",
+      "number_of_requested_CA": 3
+    },
+    {
+      "region_id": "ifm_receptor_set",
+      "number_of_requested_CA": 6
+    }
+  ],
+  "effect_rows": 48,
+  "primary_estimand": "median retained final-QC recycle per seed-model trajectory; equal AF2 models within seed; equal seeds",
+  "alignment_frame": "models and references independently aligned to 6UZ3 using the fixed stable-core mask",
+  "coordinate_validation_all_pass": true,
+  "maximum_coordinate_validation_delta_A": 5.212971836421332e-07,
+  "compact_table": "analysis/statistics_revision/seed_block/nav15_regional_rmsd/nav15_regional_rmsd_per_structure.csv.gz",
+  "compact_table_gzip_magic_hex": "1f8b",
+  "compact_table_is_actual_gzip_not_lfs_pointer": true,
+  "source_files": [
+    {
+      "working_tree_path": "nav15/dataRMSF/merged/nav15_aligned_ca_coordinates.npy",
+      "resolved_local_path": ".git/lfs/objects/4c/8f/4c8fbd3a2e7f1ce56d4ace7c36315a73271b3029856dab21bef8932a847543f6",
+      "git_lfs_oid": "4c8fbd3a2e7f1ce56d4ace7c36315a73271b3029856dab21bef8932a847543f6",
+      "resolved_size_bytes": 792288128,
+      "sha256": "4c8fbd3a2e7f1ce56d4ace7c36315a73271b3029856dab21bef8932a847543f6"
+    },
+    {
+      "working_tree_path": "nav15/dataRMSF/merged/nav15_aligned_ca_present.npy",
+      "resolved_local_path": ".git/lfs/objects/72/de/72de35b35b83524c977670f11808ac4373671e0473c6bb87873a58ce9ac08f67",
+      "git_lfs_oid": "72de35b35b83524c977670f11808ac4373671e0473c6bb87873a58ce9ac08f67",
+      "resolved_size_bytes": 66024128,
+      "sha256": "72de35b35b83524c977670f11808ac4373671e0473c6bb87873a58ce9ac08f67"
+    },
+    {
+      "working_tree_path": "nav15/dataRMSF/merged/nav15_alignment_metadata.csv",
+      "resolved_local_path": ".git/lfs/objects/64/40/64405fc5a3c3670731c7b7c2873b705d0c377ce7c269434db839d1ccb1449f9e",
+      "git_lfs_oid": "64405fc5a3c3670731c7b7c2873b705d0c377ce7c269434db839d1ccb1449f9e",
+      "resolved_size_bytes": 37258862,
+      "sha256": "64405fc5a3c3670731c7b7c2873b705d0c377ce7c269434db839d1ccb1449f9e"
+    },
+    {
+      "working_tree_path": "nav15/dataRMSF/references/nav15_aligned_references.npz",
+      "resolved_local_path": "nav15/dataRMSF/references/nav15_aligned_references.npz",
+      "git_lfs_oid": null,
+      "resolved_size_bytes": 86082,
+      "sha256": "d93769e32d6f75d7ee605c678dbdf3c37dcba26c775f4ad4ba2fe060f84d2fb8"
+    },
+    {
+      "working_tree_path": "nav15/dataRMSF/qc/nav15_all_ok3_selection_manifest.csv",
+      "resolved_local_path": "nav15/dataRMSF/qc/nav15_all_ok3_selection_manifest.csv",
+      "git_lfs_oid": null,
+      "resolved_size_bytes": 18581052,
+      "sha256": "af64d00f5632f04bbc35e1d61ca863f8357841084fbd8a280a8a5f831cf972ca"
+    }
+  ],
+  "limitations": [
+    "the external historical region mappings were not recoverable and were not reverse-engineered from old medians",
+    "the regenerated pore region is explicitly the reviewed/mapped S5/S6 helices, not an undocumented historical pore-domain selection",
+    "Cav1.2/Nav1.5 masked WT-mutant comparisons remain nonfactorial because mask columns differ by condition"
+  ]
+}

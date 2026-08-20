@@ -1,33 +1,186 @@
-# Trajectory-aware statistics revision
+# Seed-block analysis of voltage-gated ion-channel ensembles
 
-## Scope completed
+This directory contains the publication-scale statistical analysis of the
+Kv2.1, Nav1.5, and Cav1.2 AlphaFold2 ensembles. The analysis separates
+prediction-run variability, quality-control retention, and structural geometry
+so that recycle snapshots and AlphaFold2 model parameterizations are not
+treated as independent biological observations.
 
-- Read and visually inspected the complete 26-page manuscript draft.
-- Tested a canonical parser for rank, AlphaFold model, seed, and recycle naming patterns.
-- Treated model-seed trajectories as independent units.
-- Generated trajectory-bootstrap confidence intervals, equal-trajectory estimates, and earliest/latest retained-snapshot sensitivities for the primary L403A, F412L, NaV1.5, G402S, and G406R coordinates available with exact source mappings.
-- Generated raw and severe-overlap-filtered G406R analyses.
-- Added repeated trajectory subsampling for L403A and all three F412L contacts.
+## Statistical design
 
-## Important discrepancies and unresolved items
+The input random seed is the resampling unit. Retained recycles are reduced
+within each seed-model trajectory, available AlphaFold2 model
+parameterizations receive equal weight within a seed, and seeds receive equal
+weight between conditions. Primary continuous outcomes use the median retained
+recycle. Categorical outcomes use a named within-trajectory fraction or an
+earliest/latest retained-recycle summary.
 
-1. The 12.84 A L403A threshold is hard-coded in `kv21/check_L403A_E423_N179_extremes.py`; no independent derivation was found. Figure S3 therefore includes threshold sensitivity from 11.5 to 15.0 A.
-2. The original WT masked NaV1.5 IFM CSV lacks the six gate-span and complete-motif terminal-distance columns. Those metrics were marked unavailable rather than borrowed from a different mask design.
-3. The exact trajectory-resolved input behind the proposed NaV1.5 regional-RMSD Figure S5 could not be resolved locally: the nominal compressed OK3 table contains a nested Git LFS pointer. Figure S5 was not fabricated from snapshot-level summary tables.
-4. Exact mapping-QC counts are not present in the convergence manifests; Table S2 marks this stage unresolved instead of equating convergence with mapping.
-5. The manuscript F412L representative (rank 037, model 4, seed 103, r1) has `all_ok=True` and is the `earliest_converged_selected` row, but `all_ok_3=False`; it is absent from the corrected v5 final-QC contact table, which retains later snapshots from that trajectory. The draft must not state that r1 passed the corrected final-QC set. No pre-registered repository rule defining all equivalent candidates was found.
-6. The traced L403A analysis table contains 3,910 masked and 4,403 vanilla snapshots, versus 4,073 and 4,521 in Table S1. On the traced table, the >=12.84 A any-shifted fractions are 12.69% masked and 0.50% vanilla, not the draft's 9.94% and 0.02%. This denominator/source mismatch must be resolved before submission.
-7. Repeated trajectory-subsampling was completed for L403A, all three F412L contacts, NaV1.5 QQQ motif-receptor separation, G402S S402-I1523 proximity, and clash-filtered G406R acidic-partner proximity.
+The publication run used 2,000 whole-seed bootstrap replicates. The focal
+L403A Wasserstein test used 9,999 whole-seed permutations. Leave-one-AF2-model-
+out estimates accompany the focal continuous result and the complete distance
+panel.
 
-## Interpretation
+Geometry is estimated from all analysis-qualified survivors in each condition.
+Paired common-survivor calculations are retained as sensitivity analyses
+because survival through quality control depends on prediction protocol.
+Snapshot-level percentages and percentiles describe structures sampled by the
+protocol; they are not thermodynamic occupancies.
 
-Snapshot-level percentages remain useful descriptions of geometries sampled by each prediction protocol. They are not independent-replicate estimates or thermodynamic populations. Main-text claims should pair those descriptive values with model-seed trajectory counts and trajectory-bootstrap confidence intervals.
+## Cohort and quality control
+
+`seed_block/master_structure_cohort.csv` contains one row per generated
+structure with channel, sequence, protocol, seed, AF2 model, recycle, mapping,
+convergence, final-QC, analysis membership, and exclusion information. All
+125,994 manifest structures have an alignment-mapping record and pass the
+recorded mapping checks.
+
+Mapping, convergence, final structural/interface QC, and analysis-specific
+availability are separate cohort stages. This distinction is most visible in
+Kv2.1, where the interface and coordinate-availability filters reduce the
+analysis cohort after final QC. Masked-minus-vanilla analysis-final trajectory
+retention differences were -13.6 percentage points for WT (95% CI -16.8 to
+-10.4), -10.6 for L403A (-13.8 to -7.2), and -12.2 for F412L (-15.6 to -8.6).
+
+## Kv2.1 L403A
+
+The primary coordinate is the maximum E423-N179 Cα distance across the four
+subunits. Targeted masking increased the seed-balanced mean of trajectory
+medians from 10.237 to 11.298 Å, a difference of 1.061 Å (95% CI 0.960 to
+1.166 Å). Seed-balanced W1 was 1.061 Å (95% CI 0.961 to 1.161 Å;
+permutation p = 0.0001).
+
+The secondary shifted-interface threshold is 12.8413 Å, the midpoint between
+the maximum experimental WT 8SD3 distance (11.5083 Å) and the lower shifted
+experimental L403A 8SDA distance (14.1744 Å). The seed-balanced shifted
+fraction increased from 0.605% to 12.951%, an absolute difference of 12.346
+percentage points (95% CI 10.040 to 14.892). The risk ratio was 21.4, with a
+wide 95% CI of 10.0 to 209.5 because the vanilla frequency was close to zero.
+
+At this threshold, 10.755% of masked observations had all four interfaces
+shifted, whereas 0.836% had two shifted interfaces. The threshold-positive
+masked ensemble therefore predominantly sampled a symmetric four-interface
+extension rather than the two-shifted/two-WT-like pattern in 8SDA. The ordered
+four-distance RMSE to 8SDA decreased by 0.740 Å (95% CI -0.795 to -0.684 Å),
+supporting partial geometric movement without recovery of the complete
+experimental conformational program.
+
+The formal masking-by-L403A interaction for the maximum distance was +0.106 Å
+(95% CI -0.035 to +0.248 Å).
+
+## Kv2.1 F412L
+
+Masking redistributed the three L412-centered contacts in different
+directions. Seed-balanced within-4-Å fractions changed from 0.513% to 13.929%
+for L412-L316 (difference +13.416 percentage points; 95% CI +11.564 to
++15.321), remained 0% for L412-L329, and changed from 95.774% to 84.097% for
+L412-L403 (difference -11.677 percentage points; 95% CI -14.026 to -9.346).
+The ensemble therefore supports contact-specific redistribution rather than a
+uniformly expanded hydrophobic pocket.
+
+The objective representative recorded in
+`seed_block/f412l_objective_representative_selection.csv` is
+`kv21_f412l_masked_unrelaxed_rank_376_alphafold2_multimer_v3_model_3_seed_093.r10.pdb`.
+Its three audited distances are 4.515, 6.711, and 4.038 Å, and its minimum
+L412-centered local distance is 4.4 Å. Selection used the latest final-QC
+snapshot per trajectory, a 2-Å local-overlap screen, three-contact weakening,
+and robust distance to the eligible subpopulation median. The coordinate file
+itself is not present in the local repository, so the record is numerical
+rather than a regenerated structure rendering.
+
+## Nav1.5
+
+For vanilla QQQ, the snapshot-level association between QQQ-receptor
+separation and maximum gate span was weak (Spearman rho = 0.134) and changed
+across trajectory reductions: earliest rho = -0.157 (95% CI -0.239 to
+-0.081), latest rho = 0.014 (-0.055 to 0.079), and trajectory-median rho =
+0.147 (0.068 to 0.229). Motif displacement was therefore not consistently
+coupled to progressive gate opening.
+
+The regional RMSD supplement was regenerated from the intact aligned Cα arrays
+and final-QC manifest using four fixed regions: 206 S5/S6 pore-helix Cα atoms,
+29 DII-S6 atoms, the three-residue IFM/QQQ motif, and a six-residue receptor
+set. The compact table contains 34,998 structures across six experimental
+references. Stable-core validation agrees with the stored alignment RMSDs to a
+maximum absolute difference of 5.213e-7 Å.
+
+Relative to 8VYJ, the original WT mask changed DII-S6 RMSD by -0.443 Å (95% CI
+-0.976 to -0.247), IFM-motif RMSD by +16.376 Å (16.102 to 16.895), and
+receptor-set RMSD by +0.353 Å (0.320 to 0.399). Relative to 7FBS, the original
+QQQ mask changed pore-helix RMSD by -0.101 Å (-0.193 to -0.016), DII-S6 RMSD
+by -0.862 Å (-1.197 to -0.750), and receptor-set RMSD by +0.241 Å (0.228 to
+0.257). The 7FBS motif cell is unavailable because the corresponding linker
+coordinates are unresolved in that reference.
+
+The original historical regional table is represented by a nested Git-LFS
+pointer whose object is absent from the server. The regenerated region
+definitions and values are the traceable analysis source.
+
+## Cav1.2
+
+Within G402S, masking altered the categorical nearest DIV-S6 partner to S402.
+I1523 decreased from 60.760% to 47.691%, M1524 increased from 4.840% to
+35.062%, and V1520 increased from 0% to 12.240%. These values describe the
+masking response within the G402S sequence background. The persisted
+categorical table does not include a WT-versus-G402S sequence contrast.
+
+For G406R, the seed-balanced fraction of snapshots passing the R406-centered
+local-overlap criterion decreased from 67.420% to 21.887%, a difference of
+-45.533 percentage points (95% CI -47.400 to -43.720). The fraction of
+trajectories with any locally valid snapshot decreased from 95.0% to 51.6%
+(difference -43.4 percentage points; 95% CI -47.0 to -39.6). Among locally
+valid survivors, R406-D1528 proximity changed from 21.625% to 4.236%, and
+R406-D1533 proximity changed from 33.070% to 25.200%. These conditional
+frequencies describe the surviving local geometries rather than unconditional
+state populations.
+
+## Reduced-depth sensitivity
+
+The repeated common-seed analysis concerns the L403A maximum-distance and
+shifted-interface outcomes. Across 1,000 draws of 20 shared seeds, equivalent
+to 100 nominal seed-model trajectories per protocol, both effects retained
+their complete-ensemble direction in every draw. Median relative error was
+6.9% for the continuous distance and 14.1% for the shifted fraction. Subset
+intervals covered the complete-ensemble effects in 94.4% and 95.1% of draws,
+respectively, and the masked rare geometry was observed in every rare-state
+draw. These results characterize retrospective stability of the two L403A
+outcomes rather than a general sampling-depth rule for all channels.
+
+## Complete structural-distance panel
+
+`seed_block/full_panel/` contains 35,602 point estimates across 37 registered
+comparisons. W1, weighted medians, weighted IQRs, pooled weighted IQRs, and
+normalized W1 use the same seed/model weights. The panel is an effect-size
+discovery analysis without mass-univariate p/q values. Prespecified focal
+coordinates carry their own whole-seed intervals and permutation tests.
+
+Kv2.1 uses a shared mask and supports sequence-by-masking contrasts. Nav1.5
+and Cav1.2 use condition-specific mask designs, so their vanilla WT-mutant
+comparisons are the primary sequence contrasts and masked WT-mutant cells are
+protocol-specific comparisons.
+
+## Principal artifacts
+
+- `seed_block/master_structure_cohort.csv`: per-structure cohort and exclusions
+- `seed_block/master_cohort_flow_summary.csv`: cohort-stage counts
+- `seed_block/qc_retention_seed_block.csv`: seed-block retention estimates
+- `seed_block/l403a_seed_block_contrasts.csv`: focal L403A effects
+- `seed_block/f412l_direct_seed_block_contrasts.csv`: F412L contact effects
+- `seed_block/nav15_qqq_seed_block_correlation_sensitivity.csv`: QQQ correlation sensitivities
+- `seed_block/nav15_regional_rmsd/`: regenerated regional RMSD tables and Figure S5
+- `seed_block/cav12_g402s_nearest_partner_seed_block.csv`: G402S partner categories
+- `seed_block/cav12_g406r_local_validity_seed_block.csv`: G406R local validity
+- `seed_block/first100_repeated_common_seed_summary.csv`: L403A reduced-depth summary
+- `seed_block/full_panel/`: complete all-distance effect panel and overview figure
 
 ## Reproduction
 
 ```bash
-MPLCONFIGDIR=/tmp/vgci-matplotlib conda run -n bioadri python analysis/statistics_revision/scripts/run_all_statistics.py --repo-root <REPO_ROOT> --output-dir analysis/statistics_revision --seed 20260803
-MPLCONFIGDIR=/tmp/vgci-matplotlib conda run -n bioadri python analysis/statistics_revision/scripts/complete_remaining_outputs.py --repo-root <REPO_ROOT> --output-dir analysis/statistics_revision --seed 20260803
+PYTHONPATH=. python analysis/statistics_revision/scripts/run_seed_block_revision.py --mode publication
+PYTHONPATH=. python analysis/statistics_revision/scripts/run_seed_block_distance_panel.py
+PYTHONPATH=. python analysis/statistics_revision/scripts/run_nav15_regional_rmsd.py --mode publication
+PYTHONPATH=. pytest -q tests/test_seed_block_statistics.py tests/test_distribution_statistics.py tests/test_nav15_regional_rmsd.py
 ```
 
-The full execution record is in `logs/run_all_statistics.log`. No original notebook, source CSV, figure, or manuscript file was overwritten.
+The scripts write additive analysis products beneath
+`analysis/statistics_revision/seed_block/`; source coordinates, distance
+tables, notebooks, and manuscript files are not overwritten.
