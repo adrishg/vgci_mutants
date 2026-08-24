@@ -1,5 +1,39 @@
 # Seed-block analysis of voltage-gated ion-channel ensembles
 
+## Paired-seed v2 revision (authoritative manuscript analysis)
+
+The current manuscript-facing revision is in `paired_seed_v2/`; the earlier
+`seed_block/` directory remains unchanged for provenance. The v2 primary
+estimand jointly resamples recorded nominal seed labels while preserving each
+condition's QC-qualified survivor set. Common-contributing-seed and common
+model-seed survivor analyses are reported separately as sensitivities. Actual
+AlphaFold RNG values could not be recovered from the available run metadata,
+so overlap of numeric seed labels is explicitly marked as unverified rather
+than asserted to be confirmed random-seed pairing.
+
+Continuous outcomes use trajectory medians, equal surviving AF2-model weights
+within seed, and equal seed weights. Categorical outcomes use named trajectory
+fractions or earliest/latest summaries. QC retention uses all five nominal
+model strata per condition-specific seed set, with missing/failed trajectories
+contributing zero. Geometry among survivors and QC-adjusted target yield are
+kept separate. Sampling frequencies are protocol frequencies, not equilibrium
+occupancies.
+
+Publication commands:
+
+```bash
+python analysis/statistics_revision/scripts/run_paired_seed_v2.py --mode publication
+python analysis/statistics_revision/scripts/run_paired_seed_full_panel.py --mode publication
+MPLCONFIGDIR=/tmp/vgci_mpl python analysis/statistics_revision/scripts/run_paired_seed_breadth_rmsf.py --mode publication
+python analysis/statistics_revision/scripts/run_paired_seed_reduced_depth.py
+python analysis/statistics_revision/scripts/run_qc_adjusted_target_yields.py --mode publication
+```
+
+Exact mask IDs and statuses are registered in `docs/MASK_REGISTRY.tsv`.
+Authoritative narrative values are in
+`paired_seed_v2/manuscript_numbers.csv`; unresolved FASTA/A3M and seed
+provenance is documented in `paired_seed_v2/UNRESOLVED_BLOCKERS.md`.
+
 This directory contains the publication-scale statistical analysis of the
 Kv2.1, Nav1.5, and Cav1.2 AlphaFold2 ensembles. The analysis separates
 prediction-run variability, quality-control retention, and structural geometry
@@ -53,7 +87,7 @@ The secondary shifted-interface threshold is 12.8413 Å, the midpoint between
 the maximum experimental WT 8SD3 distance (11.5083 Å) and the lower shifted
 experimental L403A 8SDA distance (14.1744 Å). The seed-balanced shifted
 fraction increased from 0.605% to 12.951%, an absolute difference of 12.346
-percentage points (95% CI 10.040 to 14.892). The risk ratio was 21.4, with a
+percentage points (95% CI 10.040 to 14.892). The legacy ratio of seed-balanced protocol sampling fractions was 21.4, with a
 wide 95% CI of 10.0 to 209.5 because the vanilla frequency was close to zero.
 
 At this threshold, 10.755% of masked observations had all four interfaces

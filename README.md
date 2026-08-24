@@ -8,7 +8,7 @@ The structural ensembles and associated dataset files are available on Hugging F
 
 This is the **analysis and validation repository** for AlphaFold2 conformational ensembles of three
 voltage-gated ion channels: Cav1.2, Kv2.1, and Nav1.5. It compares vanilla and targeted-masked
-ensembles to test whether the targeted masking approach broadens structural sampling while preserving
+ensembles to test how the targeted masking approach redistributes structural sampling while preserving
 physically plausible channel geometry.
 
 > **Looking for the masking code?** The implementation, ColabFold workflow, and instructions for

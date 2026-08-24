@@ -1,0 +1,6 @@
+key	value
+date	2026-08-24
+git_starting_commit	1982f26a52ed44474cc13af78b91a83fea7136b4
+python	3.13.12
+platform	macOS-26.6.2-arm64-arm-64bit-Mach-O
+packages	numpy=2.4.3; pandas=3.0.5; scipy=1.18.0; matplotlib=3.11.1; seaborn=0.13.2; pytest=9.1.1; nbclient=0.11.0
