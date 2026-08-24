@@ -14,11 +14,8 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 
-# Local render/scratch outputs and working notes
+# Local render and scratch outputs
 tmp/
-*_preliminary_results.txt
-*checklist*.txt
-*FILTERING_STATUS.txt
 
 # Regenerable statistical caches and full distance-level exports
 notebooks/statistics/outputs/cache/
