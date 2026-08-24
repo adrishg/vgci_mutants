@@ -1,0 +1,7 @@
+{
+  "mode": "publication",
+  "bootstrap_replicates": 2000,
+  "base_seed": 20260824,
+  "breadth_primary": "IQR and MAD",
+  "RMSF_interpretation": "positional dispersion among predictions"
+}

@@ -1,0 +1,14 @@
+{
+  "mode": "publication",
+  "rank_bootstrap_replicates": 200,
+  "random_seed_base": 20260824,
+  "comparisons": 37,
+  "coordinate_by_comparison_effect_estimates": 35602,
+  "normalization_low_spread_flags_A": [
+    0.05,
+    0.1,
+    0.25
+  ],
+  "mass_univariate_p_or_q_values": "not calculated",
+  "rank_interpretation": "recurrence under whole-nominal-seed resampling; not independent validation"
+}

@@ -1,0 +1,14 @@
+{
+  "analysis": "paired_seed_v2",
+  "mode": "publication",
+  "date": "2026-08-24",
+  "git_starting_commit": "1982f26a52ed44474cc13af78b91a83fea7136b4",
+  "python": "3.13.12",
+  "base_random_seed": 20260824,
+  "bootstrap_replicates": 2000,
+  "permutation_replicates": 9999,
+  "primary_estimand": "marginal QC-qualified contrast with joint nominal-seed resampling",
+  "pairing_provenance": "actual RNG seed values unavailable; pairing keys are nominal seed labels",
+  "source_hashes": "audit/SOURCE_INPUT_HASHES.tsv",
+  "source_mutation_policy": "read-only inputs; all results written under paired_seed_v2"
+}
