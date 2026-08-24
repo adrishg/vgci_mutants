@@ -1,0 +1,27 @@
+claim_id	manuscript_section	old_display_text	display_point_estimate	display_ci_low	display_ci_high	source_table	status
+L403_MAX	Kv2.1 L403A results		1.1	1.0	1.2	analysis/statistics_revision/paired_seed_v2/l403a_focal_paired_seed.csv	verified
+L403_SHIFT	Kv2.1 L403A results	10.040–14.892	12.3	9.8	14.9	analysis/statistics_revision/paired_seed_v2/l403a_focal_paired_seed.csv	verified
+L403_RMSE_8SDA	Kv2.1 L403A results		-0.7	-0.8	-0.7	analysis/statistics_revision/paired_seed_v2/l403a_focal_paired_seed.csv	verified
+L403_CLOSER_8SDA	Kv2.1 L403A results	5.476%	5.0	3.2	6.9	analysis/statistics_revision/paired_seed_v2/l403a_focal_paired_seed.csv	verified
+L403_W1	Kv2.1 L403A results		1.1	1.0	1.2	analysis/statistics_revision/paired_seed_v2/l403a_w1_paired_seed.csv	verified
+L403_INTERACTION	Kv2.1 L403A results	interaction contrast was 0.1 Å, and its 95% CI included zero	0.3	0.1	0.4	analysis/statistics_revision/paired_seed_v2/kv21_interactions_paired_seed.csv	pairing-unverified sensitivity
+F412_L316_4A	Kv2.1 F412L results	11.564–15.321	13.4	11.6	15.3	analysis/statistics_revision/paired_seed_v2/f412l_contacts_paired_seed.csv	verified
+F412_L403_4A	Kv2.1 F412L results	−14.026 to −9.346	-11.7	-13.8	-9.7	analysis/statistics_revision/paired_seed_v2/f412l_contacts_paired_seed.csv	verified
+F412_L329_CONT	Kv2.1 F412L results		0.6	0.5	0.8	analysis/statistics_revision/paired_seed_v2/f412l_contacts_paired_seed.csv	verified
+NAV_QQQ_WT	Nav1.5 results	11.9 Å in WT to 29.0 Å in QQQ	9.4	8.4	10.5	analysis/statistics_revision/paired_seed_v2/nav15_focal_paired_seed.csv	verified
+NAV_WT_STANDARD	Nav1.5 results		9.9	8.9	10.9	analysis/statistics_revision/paired_seed_v2/nav15_focal_paired_seed.csv	verified
+NAV_WT_V2	Nav1.5 results		10.0	9.0	11.0	analysis/statistics_revision/paired_seed_v2/nav15_focal_paired_seed.csv	verified
+NAV_WT_NOIFM	Nav1.5 results		10.0	9.0	11.0	analysis/statistics_revision/paired_seed_v2/nav15_focal_paired_seed.csv	verified
+NAV_QQQ_STANDARD	Nav1.5 results		0.3	-0.0	0.6	analysis/statistics_revision/paired_seed_v2/nav15_focal_paired_seed.csv	verified
+NAV_QQQ_V2_GATE	Nav1.5 results		0.3	0.1	0.5	analysis/statistics_revision/paired_seed_v2/nav15_focal_paired_seed.csv	verified
+G402_CA	Cav1.2 results	G402 shortest non-H side-chain distance	0.07	0.07	0.08	analysis/statistics_revision/paired_seed_v2/g402s_focal_paired_seed.csv	verified
+G402_TV	Cav1.2 results	I1523 decreased from 60.8% to 47.7%	0.0002	0.0000	0.0006	analysis/statistics_revision/paired_seed_v2/g402s_partner_distribution.csv	verified
+G406_PASS	Cav1.2 results	−45.533 percentage points	-45.5	-47.2	-43.8	analysis/statistics_revision/paired_seed_v2/g406r_overlap_and_contacts.csv	verified
+G406_ANY	Cav1.2 results	−43.4 percentage points	-43.4	-46.8	-39.6	analysis/statistics_revision/paired_seed_v2/g406r_overlap_and_contacts.csv	verified
+G406_COND_1528	Cav1.2 results	−17.389 percentage points	-17.4	-19.7	-14.8	analysis/statistics_revision/paired_seed_v2/g406r_overlap_and_contacts.csv	verified
+G406_COND_1533	Cav1.2 results	−7.870 percentage points	-7.9	-11.9	-3.8	analysis/statistics_revision/paired_seed_v2/g406r_overlap_and_contacts.csv	verified
+G406_UNCOND_1528	Cav1.2 results		-5.7	-6.7	-4.8	analysis/statistics_revision/paired_seed_v2/g406r_overlap_and_contacts.csv	verified
+G406_UNCOND_1533	Cav1.2 results		-22.1	-23.8	-20.5	analysis/statistics_revision/paired_seed_v2/g406r_overlap_and_contacts.csv	verified
+KV_RET_WT	QC results		-13.6	-16.8	-10.4	analysis/statistics_revision/paired_seed_v2/paired_retention_contrasts.csv	verified
+KV_RET_L403A	QC results		-10.6	-13.9	-7.2	analysis/statistics_revision/paired_seed_v2/paired_retention_contrasts.csv	verified
+KV_RET_F412L	QC results		-12.2	-15.5	-8.7	analysis/statistics_revision/paired_seed_v2/paired_retention_contrasts.csv	verified
