@@ -22,4 +22,4 @@ The registered `nav15_standard` WT focal distance table contains the two motifâ€
 
 ## Historical breadth provenance
 
-Some historical manuscript S6 SD ratios lack a complete executable derivation. Revised whole-seed IQR/MAD/W1 summaries are authoritative; historical values are not treated as reproduced.
+Some historical S6 SD ratios lack a complete executable derivation. Revised whole-seed IQR/MAD/W1 summaries are authoritative; historical values are not treated as reproduced.

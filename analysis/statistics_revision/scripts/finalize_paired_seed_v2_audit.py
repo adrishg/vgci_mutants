@@ -68,17 +68,6 @@ def main() -> None:
     if not all(row["unchanged"] for row in source_rows):
         raise RuntimeError("At least one frozen source input changed")
 
-    original = out / "manuscript/original/2026-08-22_VGCImutantsPaperDraft2_moreStats_corrected_Cav12pair.docx"
-    write_tsv(
-        audit / "MANUSCRIPT_SOURCE_HASH.tsv",
-        ["relative_path", "sha256", "size_bytes"],
-        [{
-            "relative_path": original.relative_to(ROOT),
-            "sha256": sha256(original),
-            "size_bytes": original.stat().st_size,
-        }],
-    )
-
     git_start = subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True, capture_output=True, text=True
     ).stdout.strip()
@@ -138,8 +127,7 @@ def main() -> None:
         ROOT / "docs/MASK_REGISTRY.tsv", ROOT / "docs/CONSTRUCT_REGISTRY.tsv",
         ROOT / "docs/OUTCOME_REGISTRY.tsv", ROOT / "docs/KNOWN_ISSUES.md",
         ROOT / "docs/A3M_UPLOAD_CHECKLIST.md", ROOT / "shared/paired_seed_statistics.py",
-        ROOT / "shared/manuscript_consistency.py", ROOT / "shared/docx_integrity.py",
-        ROOT / "tests/test_paired_seed_statistics.py", ROOT / "tests/test_manuscript_revision_checks.py",
+        ROOT / "tests/test_paired_seed_statistics.py",
     ]
     patterns = [
         "analysis/statistics_revision/scripts/*paired_seed*.py",

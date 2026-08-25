@@ -1,4 +1,4 @@
-git switch -c stats/paired-seed-manuscript-revision
+git branch -m stats/paired-seed-analysis-revision
 git lfs pull
 PYTHONPATH=. pytest -q tests/test_paired_seed_statistics.py tests/test_seed_block_statistics.py
 python analysis/statistics_revision/scripts/run_paired_seed_v2.py --mode exploratory --output-dir /tmp/vgci_paired_seed_v2_smoke
@@ -9,13 +9,8 @@ python analysis/statistics_revision/scripts/run_paired_seed_full_panel.py --mode
 MPLCONFIGDIR=/tmp/vgci_mpl python analysis/statistics_revision/scripts/run_paired_seed_breadth_rmsf.py --mode publication --output-dir analysis/statistics_revision/paired_seed_v2
 python analysis/statistics_revision/scripts/run_paired_seed_reduced_depth.py --mode publication --output-dir analysis/statistics_revision/paired_seed_v2
 python analysis/statistics_revision/scripts/run_qc_adjusted_target_yields.py --mode publication --output-dir analysis/statistics_revision/paired_seed_v2
-python analysis/statistics_revision/scripts/generate_paired_seed_manuscript_outputs.py
 python paperFigures/build_figure_s7_notebook.py
 jupyter execute --inplace --timeout=900 paperFigures/Supplementary_Figure_S7_Kv21_L403A_Experimental_Signatures.ipynb
-python analysis/statistics_revision/scripts/revise_manuscript_ooxml.py
-unzip -t analysis/statistics_revision/paired_seed_v2/manuscript/2026-08-22_VGCImutantsPaperDraft2_pairedSeedStats_REVISED.docx
-osascript -e '<Word DOCX-to-PDF export commands; PDF written only under /private/tmp>'
-pdftoppm -r 120 -png /private/tmp/vgci_paired_seed_revised_final.pdf /private/tmp/vgci_pdf_pages_definitive/page
 PYTHONPATH=/private/tmp/vgci_testdeps:.:scripts/cav12_ensemble_rmsf_cluster_package/src:scripts/kv21_ensemble_rmsf_cluster_package/src:scripts/nav15_ensemble_rmsf_cluster_package/src pytest -q --import-mode=importlib
 python analysis/statistics_revision/scripts/finalize_paired_seed_v2_audit.py
 

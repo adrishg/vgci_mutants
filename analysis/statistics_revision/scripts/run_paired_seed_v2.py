@@ -62,6 +62,31 @@ def save(frame: pd.DataFrame, path: Path) -> None:
     frame.to_csv(path, index=False)
 
 
+def plot_zero_to_four(frame: pd.DataFrame, output: Path) -> None:
+    """Write the publication figure beside its authoritative source table."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    figure_dir = output / "figures"
+    figure_dir.mkdir(parents=True, exist_ok=True)
+    fig, ax = plt.subplots(figsize=(7.2, 4.5), constrained_layout=True)
+    x = frame["category"].to_numpy()
+    width = 0.36
+    ax.bar(x - width / 2, 100 * frame["probability_A"], width, label="Vanilla", color="#4C78A8")
+    ax.bar(x + width / 2, 100 * frame["probability_B"], width, label="Masked", color="#E45756")
+    ax.set(
+        xlabel="Interfaces above experiment-anchored 12.8 Å cutoff",
+        ylabel="Seed-balanced protocol sampling frequency (%)",
+        xticks=x,
+    )
+    ax.legend(frameon=False)
+    ax.spines[["top", "right"]].set_visible(False)
+    fig.savefig(figure_dir / "l403a_zero_to_four_subunits.png", dpi=300)
+    fig.savefig(figure_dir / "l403a_zero_to_four_subunits.pdf")
+    plt.close(fig)
+
+
 def trajectory_summary(frame: pd.DataFrame, value: str, reduction: str) -> pd.DataFrame:
     work = add_metadata(frame) if not {"seed", "model_number"}.issubset(frame) else frame.copy()
     work[value] = pd.to_numeric(work[value], errors="coerce")
@@ -333,6 +358,7 @@ def l403a(output: Path, bootstrap: int, permutations: int) -> None:
         category_rows[key] = value
     category_rows["chain_mapping_note"] = "sorted/count summary; predicted chain labels are not mapped to experimental chain identities"
     save(category_rows, output / "l403a_zero_to_four_subunits.csv")
+    plot_zero_to_four(category_rows, output)
 
     yields = []
     for protocol in ("vanilla", "masked"):

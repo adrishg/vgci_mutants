@@ -1,8 +1,8 @@
 # Seed-block analysis of voltage-gated ion-channel ensembles
 
-## Paired-seed v2 revision (authoritative manuscript analysis)
+## Paired-seed v2 revision (authoritative statistical analysis)
 
-The current manuscript-facing revision is in `paired_seed_v2/`; the earlier
+The current paired-seed statistical revision is in `paired_seed_v2/`; the earlier
 `seed_block/` directory remains unchanged for provenance. The v2 primary
 estimand jointly resamples recorded nominal seed labels while preserving each
 condition's QC-qualified survivor set. Common-contributing-seed and common
@@ -30,9 +30,9 @@ python analysis/statistics_revision/scripts/run_qc_adjusted_target_yields.py --m
 ```
 
 Exact mask IDs and statuses are registered in `docs/MASK_REGISTRY.tsv`.
-Authoritative narrative values are in
-`paired_seed_v2/manuscript_numbers.csv`; unresolved FASTA/A3M and seed
-provenance is documented in `paired_seed_v2/UNRESOLVED_BLOCKERS.md`.
+Full-precision estimates are stored in the focal, retention, yield, breadth,
+RMSF, and full-panel tables under `paired_seed_v2/`; unresolved FASTA/A3M and
+seed provenance is documented in `paired_seed_v2/UNRESOLVED_BLOCKERS.md`.
 
 This directory contains the publication-scale statistical analysis of the
 Kv2.1, Nav1.5, and Cav1.2 AlphaFold2 ensembles. The analysis separates
@@ -217,4 +217,4 @@ PYTHONPATH=. pytest -q tests/test_seed_block_statistics.py tests/test_distributi
 
 The scripts write additive analysis products beneath
 `analysis/statistics_revision/seed_block/`; source coordinates, distance
-tables, notebooks, and manuscript files are not overwritten.
+tables, and notebooks are not overwritten.
