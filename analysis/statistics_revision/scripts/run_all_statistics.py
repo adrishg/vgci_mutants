@@ -46,30 +46,20 @@ DISTANCE_COLUMNS = {
 L403A_THRESHOLD = 12.84
 
 
-def check_not_lfs_pointer(path: Path) -> None:
-    with path.open("rb") as handle:
-        prefix = handle.read(200)
-    if prefix.startswith(b"version https://git-lfs.github.com/spec/v1"):
-        raise RuntimeError(f"Unresolved Git LFS pointer: {path}")
-
-
 def resolve_lfs(path: Path, repo_root: Path) -> Path:
-    with path.open("rb") as handle:
-        prefix = handle.read(256).decode("utf-8", errors="ignore")
-    if not prefix.startswith("version https://git-lfs.github.com/spec/v1"):
-        return path
-    oid_line = next((line for line in prefix.splitlines() if line.startswith("oid sha256:")), None)
-    if oid_line is None:
-        raise RuntimeError(f"Malformed Git LFS pointer: {path}")
-    oid = oid_line.split(":", 1)[1]
-    target = repo_root / ".git" / "lfs" / "objects" / oid[:2] / oid[2:4] / oid
-    if not target.is_file():
-        raise FileNotFoundError(f"Local Git LFS object unavailable for {path}")
-    return target
+    """Return a readable local path, fetching from Hugging Face if needed.
+
+    ``repo_root`` is retained for call compatibility and is no longer used.
+    """
+    from shared import data_access
+
+    return data_access.resolve(path)
 
 
 def read_csv(path: Path, repo_root: Path, **kwargs) -> pd.DataFrame:
-    resolved = resolve_lfs(path, repo_root)
+    from shared import data_access
+
+    resolved = data_access.resolve(path)
     logging.info("input=%s resolved=%s", path, resolved)
     compression = "gzip" if path.suffix == ".gz" else "infer"
     return pd.read_csv(resolved, compression=compression, **kwargs)

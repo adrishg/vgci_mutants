@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import re
 
 import pandas as pd
 
@@ -17,34 +16,10 @@ VALID_SELECTIONS = (
 
 
 def _read_csv_resolving_local_lfs(path: Path) -> pd.DataFrame:
-    """Read a CSV from its working-tree path or downloaded local LFS object."""
-    with path.open("rb") as handle:
-        prefix = handle.read(256).decode("utf-8", errors="ignore")
-    if not prefix.startswith("version https://git-lfs.github.com/spec/v1"):
-        return pd.read_csv(path)
+    """Read a CSV from the working tree, the local cache, or Hugging Face."""
+    from . import data_access
 
-    match = re.search(r"^oid sha256:([0-9a-f]{64})$", prefix, flags=re.MULTILINE)
-    if not match:
-        raise ValueError(f"Malformed Git-LFS pointer: {path}")
-    repository_root = next(
-        (parent for parent in (path.parent, *path.parents) if (parent / ".git").exists()),
-        None,
-    )
-    if repository_root is None:
-        raise FileNotFoundError(
-            f"Cannot locate the repository root needed to resolve {path}"
-        )
-    oid = match.group(1)
-    object_path = (
-        repository_root / ".git" / "lfs" / "objects"
-        / oid[:2] / oid[2:4] / oid
-    )
-    if not object_path.is_file():
-        raise FileNotFoundError(
-            f"{path} is a Git-LFS pointer, but its local object is unavailable. "
-            "Run `git lfs pull` before executing the notebook."
-        )
-    return pd.read_csv(object_path)
+    return pd.read_csv(data_access.resolve(path))
 
 
 def select_manifest_rows(path: str | Path, subset: str) -> pd.DataFrame:

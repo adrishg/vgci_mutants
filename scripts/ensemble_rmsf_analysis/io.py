@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-import re
 import pandas as pd
 
 PROFILE_FILES = {
@@ -23,28 +22,13 @@ PROFILE_FILES = {
 
 
 def resolve_local_lfs_object(path: str | Path, repo_root: str | Path) -> Path:
-    """Return a local Git-LFS object when the working-tree file is a pointer.
+    """Return a readable local path, fetching the table if it is not here.
 
-    Large RMSF tables remain lightweight pointers in the repository.  Notebook
-    analyses can still use already-downloaded objects without replacing those
-    pointers or requiring a network operation.
+    ``repo_root`` is retained for call compatibility and is no longer used.
     """
-    path = Path(path)
-    with path.open("rb") as handle:
-        prefix = handle.read(256).decode("utf-8", errors="ignore")
-    if not prefix.startswith("version https://git-lfs.github.com/spec/v1"):
-        return path
-    match = re.search(r"^oid sha256:([0-9a-f]{64})$", prefix, flags=re.MULTILINE)
-    if not match:
-        raise ValueError(f"Malformed Git-LFS pointer: {path}")
-    oid = match.group(1)
-    object_path = Path(repo_root) / ".git" / "lfs" / "objects" / oid[:2] / oid[2:4] / oid
-    if not object_path.is_file():
-        raise FileNotFoundError(
-            f"{path} is a Git-LFS pointer, but its local object is unavailable. "
-            "Run `git lfs pull` before executing the RMSF notebook."
-        )
-    return object_path
+    from shared import data_access
+
+    return data_access.resolve(path)
 
 
 def read_csv_resolving_lfs(

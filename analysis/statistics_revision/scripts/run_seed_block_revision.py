@@ -65,9 +65,10 @@ def save(frame: pd.DataFrame, path: Path) -> None:
 
 
 def read_csv(path: Path, **kwargs) -> pd.DataFrame:
-    """Read a regular CSV or its locally available Git LFS object."""
-    resolved = resolve_local_lfs_object(path, ROOT)
-    return pd.read_csv(resolved, **kwargs)
+    """Read a CSV from the working tree, the local cache, or Hugging Face."""
+    from shared import data_access
+
+    return pd.read_csv(data_access.resolve(path), **kwargs)
 
 
 def add_metadata(frame: pd.DataFrame) -> pd.DataFrame:

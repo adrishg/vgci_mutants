@@ -190,13 +190,21 @@ The notebooks use explicit dataset selectors rather than silently replacing one 
 | `all_ok_3` | Models retained using the 3 Å successive stable-core RMSD criterion |
 | `all_ok_3_structural_qc` | Kv2.1 3 Å subset followed by selectivity-filter tetramer integrity filtering |
 | `all_ok_3_structural_interface_qc` | Kv2.1 structural-QC subset followed by trajectory-level pore–VSD interface filtering |
+| `all_ok_3_structural_interface_alignment_qc` | Kv2.1 interface-QC subset with stable-core alignment failures removed |
 
 The principal Cav1.2 and Nav1.5 notebooks currently use `all_ok_3`. The principal Kv2.1 notebook uses
-`all_ok_3_structural_interface_qc` because a low successive RMSD can retain a converged but structurally
-disrupted tetramer. These persisted CSVs include both the selectivity-filter check and a trajectory-level
-interface check. A trajectory is rejected when any K427/E423/K420-to-N179/V182 Cα distance exceeds 27 Å.
-This cutoff is above the largest corresponding 8SD3/8SDA distance (25.51 Å) and also removes one
-isolated L403A recycle excursion at 27.35 Å.
+`all_ok_3_structural_interface_alignment_qc` because a low successive RMSD can retain a converged but
+structurally disrupted tetramer. That selection applies four checks in sequence. Recycle convergence
+retains each trajectory from the first recycle after which every successive stable-core Cα RMSD stays at
+or below 3 Å with at least 0.90 aligned coverage. The selectivity-filter check requires an assembled G375
+ring. The interface check rejects a trajectory when any K427/E423/K420-to-N179/V182 Cα distance exceeds
+27 Å; this cutoff is above the largest corresponding 8SD3/8SDA distance (25.51 Å) and also removes one
+isolated L403A recycle excursion at 27.35 Å. The alignment check removes trajectories whose post-fit
+stable-core RMSD falls into the separated failure population above 4 Å. Of 6,000 snapshots and 500
+trajectories per ensemble, between 3,578 and 4,562 snapshots survive.
+
+The intermediate `_structural_qc` and `_structural_interface_qc` tables are retained for provenance and
+should not be used for the primary comparison.
 
 CSV filenames are dated and should be treated as versioned inputs. In particular, the current Cav1.2
 G406R analysis uses the complete `26-07-25_Cav1.2_g406r_*` tables and their corresponding 3 Å subsets.
@@ -251,6 +259,28 @@ measurement is calculated directly from experimental coordinates.
 The IFM-latching notebook examines the WT IFM motif and the IFM→QQQ mutant using explicitly defined
 receptor contacts. These local coordinates are interpreted alongside pore and gate measurements and
 are not treated as sufficient evidence for an open or inactivated state on their own.
+
+## Data availability
+
+The structural ensembles and the large derived tables are deposited in the companion Hugging Face
+dataset, [adrishgz/vgic-mutant-structural-ensembles](https://huggingface.co/datasets/adrishgz/vgic-mutant-structural-ensembles).
+This repository keeps the analysis code, the convergence manifests, the statistics outputs, and the
+published figures.
+
+Nothing needs to be downloaded in advance. `shared/data_access.py` resolves a data path against the
+working tree first, then a local cache, and fetches from the dataset only when a file is absent. A file
+is retrieved once and read from the cache afterwards, so a notebook run offline after its first
+execution behaves as though the tables were local.
+
+```python
+from shared.data_access import resolve
+
+frame = pd.read_csv(resolve("kv21/dataDistances/26-02-11_Kv2.1_wt_maskedAF2_distances_all.csv"))
+```
+
+Two environment variables adjust this. `VGIC_DATA_ROOT` points at an existing complete copy, which
+suppresses downloading entirely and is the setting to use on a cluster. `VGIC_OFFLINE` forbids network
+access, so a missing file raises rather than being fetched.
 
 ## Running the notebooks
 

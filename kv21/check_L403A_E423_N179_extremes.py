@@ -2,9 +2,12 @@
 
 from pathlib import Path
 import math
+import sys
 
 import pandas as pd
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))
 
 DATA_DIR = Path("kv21/dataDistances")
 
@@ -67,28 +70,17 @@ OUTPUT_DIR = DATA_DIR / "analysis"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def check_not_lfs_pointer(path: Path) -> None:
-    with path.open("rb") as handle:
-        first_line = handle.readline()
-
-    if first_line.startswith(b"version https://git-lfs.github.com/spec/v1"):
-        raise RuntimeError(
-            f"{path} is still a Git LFS pointer. Run git lfs pull first."
-        )
-
-
 def analyze(condition: str, path: Path):
-    if not path.exists():
-        raise FileNotFoundError(f"Missing file: {path}")
+    from shared import data_access
 
-    check_not_lfs_pointer(path)
+    resolved = data_access.resolve(path)
 
     print("\n" + "=" * 90)
     print(condition.upper())
     print("=" * 90)
-    print(f"Reading: {path}")
+    print(f"Reading: {resolved}")
 
-    df = pd.read_csv(path)
+    df = pd.read_csv(resolved)
 
     required = ["pdb_file", *DISTANCE_COLUMNS.values()]
     missing = [column for column in required if column not in df.columns]
