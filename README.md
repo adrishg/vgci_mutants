@@ -282,6 +282,10 @@ Two environment variables adjust this. `VGIC_DATA_ROOT` points at an existing co
 suppresses downloading entirely and is the setting to use on a cluster. `VGIC_OFFLINE` forbids network
 access, so a missing file raises rather than being fetched.
 
+The regeneration scripts under `scripts/filtering/` are the exception. They walk whole directories to
+rebuild the QC tiers and therefore need a complete local copy rather than files fetched one at a time;
+run them with `VGIC_DATA_ROOT` set, or on the machine that holds the data.
+
 ## Running the notebooks
 
 Start Jupyter from the repository root so imports from `shared/` and relative paths to data and

@@ -179,7 +179,14 @@ def structural_qc_allowlists(repo: Path, channel: str) -> dict[str, set[str]]:
     if channel != "kv21":
         return {}
     result = {}
-    for path in (repo / "kv21" / "dataDistances").glob("*structural_interface_qc.csv"):
+    candidates = sorted((repo / "kv21" / "dataDistances").glob("*structural_interface_qc.csv"))
+    if not candidates:
+        raise FileNotFoundError(
+            "No Kv2.1 structural-interface allowlists in kv21/dataDistances. "
+            "This script regenerates tables from a complete local copy; point "
+            "VGIC_DATA_ROOT at one, or run it where the data is present."
+        )
+    for path in candidates:
         low = path.name.lower()
         condition = next((x for x in ("wt", "l403a", "f412l") if f"_{x}_" in low), None)
         protocol = next((x for x in ("vanilla", "masked") if x in low), None)

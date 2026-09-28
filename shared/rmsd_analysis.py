@@ -46,56 +46,37 @@ def apply_kv21_rmsd_qc(
     if missing:
         raise KeyError(f"Kv2.1 RMSD QC is missing columns: {sorted(missing)}")
 
-    root = Path(repo_root)
     work = frame.copy()
     work["_pdb_basename"] = work["pdb_file"].astype(str).map(lambda x: Path(x).name)
     work["_trajectory"] = work["_pdb_basename"].str.replace(
         r"\.r\d+\.pdb$", ".pdb", regex=True
     )
 
+    # Named explicitly rather than discovered by glob: the allowlists are
+    # published in the companion dataset and need not be present on disk.
+    from . import data_access
+
     allowlists: dict[tuple[str, str], set[str]] = {}
     for condition in ("wt", "l403a", "f412l"):
         for protocol in ("vanilla", "masked"):
-            data_root = root / "kv21/dataDistances"
-            candidates = sorted(
-                set(data_root.glob(
-                    f"*{condition}_{protocol}AF2*"
-                    "structural_interface_alignment_qc.csv"
-                ))
-                | set(data_root.glob(
-                    f"*{condition}_{protocol}AF2*"
-                    "structural_interface_qc.csv"
-                ))
+            stem = (
+                f"kv21/dataDistances/26-02-11_Kv2.1_{condition}_{protocol}AF2"
+                "_distances_all_ok_rmsd_3A_structural_interface"
             )
-            valid = []
-            rejected = []
-            for candidate in candidates:
-                columns = pd.read_csv(candidate, nrows=0).columns
-                if "pdb_file" in columns:
-                    valid.append(candidate)
-                else:
-                    rejected.append(candidate)
-            canonical = [
-                path for path in valid if "AF2test" not in path.name
-            ]
-            if canonical:
-                valid = canonical
-            alignment_qc = [
-                path for path in valid
-                if path.name.endswith(
-                    "structural_interface_alignment_qc.csv"
-                )
-            ]
-            if alignment_qc:
-                valid = alignment_qc
-            if len(valid) != 1:
+            resolved = None
+            for suffix in ("_alignment_qc.csv", "_qc.csv"):
+                try:
+                    resolved = data_access.resolve(stem + suffix)
+                    break
+                except (FileNotFoundError, data_access.DataUnavailable):
+                    continue
+            if resolved is None:
                 raise FileNotFoundError(
-                    f"Expected one Kv2.1 structural-interface allowlist for "
-                    f"{condition}/{protocol}; valid={valid}; "
-                    f"rejected non-tabular/LFS pointers={rejected}"
+                    f"No Kv2.1 structural-interface allowlist for "
+                    f"{condition}/{protocol}; looked for {stem}_alignment_qc.csv"
                 )
             values = pd.read_csv(
-                valid[0], usecols=["pdb_file"]
+                resolved, usecols=["pdb_file"]
             )["pdb_file"]
             allowlists[(condition, protocol)] = set(
                 values.astype(str).map(lambda x: Path(x).name)
