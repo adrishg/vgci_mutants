@@ -1,0 +1,17 @@
+{
+  "channel": "kv21",
+  "total_downloaded_csvs": 19,
+  "channel_csvs": 6,
+  "rows": 35994,
+  "python": "3.13.12",
+  "bootstrap_replicates": 3000,
+  "random_seed": 20260930,
+  "packages": {
+    "numpy": "2.4.3",
+    "pandas": "3.0.5",
+    "scipy": "1.18.0",
+    "statsmodels": "0.14.6",
+    "matplotlib": "3.11.1",
+    "seaborn": "0.13.2"
+  }
+}

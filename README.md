@@ -174,6 +174,7 @@ The root contains only this project overview. Supporting documentation is groupe
 - [Figure and notebook index](docs/FIGURE_INDEX.md)
 - [Experimental-comparison RMSD workflow](docs/workflows/RMSD_WORKFLOW.md)
 - [Production A3M provenance](docs/workflows/A3M_PROVENANCE.md)
+- [Local MolProbity notebooks, audit, and execution](docs/workflows/MOLPROBITY_ANALYSIS.md)
 - [Nav1.5 retrospective distance audit](docs/audits/NAV15_DISTANCE_RETROSPECTIVE_AUDIT.md)
 
 Operational instructions and validation records remain beside the scripts they document. In
